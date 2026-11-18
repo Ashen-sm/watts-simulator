@@ -1,0 +1,2011 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Watts Simulator — Sri Lanka Boarding House CEB Slab & Leakage Monitor</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Inter Font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script>
+    // Apply saved theme before first paint (avoids a light flash)
+    (function () {
+      try { if (localStorage.getItem('watts-theme') === 'dark') document.documentElement.classList.add('dark'); } catch (e) {}
+    })();
+  </script>
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #f1f5f9;
+      color: #0f172a;
+      overflow-x: hidden;
+    }
+    .font-mono-code {
+      font-family: 'JetBrains Mono', monospace;
+    }
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #e2e8f0;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #94a3b8;
+      border-radius: 9999px;
+    }
+    button, input, select {
+      touch-action: manipulation;
+    }
+
+    /* ---------- Chart + theme variables ---------- */
+    :root { --chart-text:#64748b; --chart-grid:#e2e8f0; --chart-track:#e2e8f0; --chart-card:#ffffff; }
+    html.dark { --chart-text:#94a3b8; --chart-grid:#25364f; --chart-track:#1c2b45; --chart-card:#0f1b2d; color-scheme: dark; }
+
+    /* ---------- DARK MODE overrides (!important so JS-swapped classNames stay themed) ---------- */
+    html.dark body { background-color:#070d19; color:#e2e8f0; }
+    html.dark ::-webkit-scrollbar-track { background:#0f1b2d; }
+    html.dark ::-webkit-scrollbar-thumb { background:#334766; }
+
+    html.dark .bg-white { background-color:#0f1b2d !important; }
+    html.dark .bg-white\/80 { background-color:rgba(15,27,45,.8) !important; }
+    html.dark .bg-slate-50 { background-color:#13223a !important; }
+    html.dark .bg-slate-100 { background-color:#1a2a44 !important; }
+    html.dark .bg-slate-200 { background-color:#223554 !important; }
+    html.dark .hover\:bg-slate-200:hover, html.dark .hover\:bg-slate-300:hover { background-color:#2c4266 !important; }
+
+    html.dark .bg-emerald-50, html.dark .bg-emerald-50\/70, html.dark .bg-emerald-50\/90 { background-color:rgba(16,185,129,.10) !important; }
+    html.dark .bg-emerald-100, html.dark .bg-emerald-200 { background-color:rgba(16,185,129,.22) !important; }
+    html.dark .bg-amber-50, html.dark .bg-amber-50\/80 { background-color:rgba(245,158,11,.10) !important; }
+    html.dark .bg-amber-100, html.dark .bg-amber-200 { background-color:rgba(245,158,11,.22) !important; }
+    html.dark .hover\:bg-amber-200:hover { background-color:rgba(245,158,11,.32) !important; }
+    html.dark .bg-rose-50 { background-color:rgba(244,63,94,.10) !important; }
+    html.dark .bg-rose-100, html.dark .bg-rose-200 { background-color:rgba(244,63,94,.22) !important; }
+    html.dark .hover\:bg-rose-100:hover, html.dark .hover\:bg-rose-200:hover { background-color:rgba(244,63,94,.32) !important; }
+    html.dark .bg-blue-50, html.dark .bg-blue-100 { background-color:rgba(59,130,246,.18) !important; }
+
+    html.dark .text-slate-900, html.dark .text-slate-800 { color:#f1f5f9 !important; }
+    html.dark .text-slate-700 { color:#cbd5e1 !important; }
+    html.dark .text-slate-600 { color:#b4c0d3 !important; }
+    html.dark .text-slate-500 { color:#8fa0b8 !important; }
+    html.dark .text-emerald-700, html.dark .text-emerald-800, html.dark .text-emerald-900, html.dark .text-emerald-950 { color:#6ee7b7 !important; }
+    html.dark .text-amber-700, html.dark .text-amber-800, html.dark .text-amber-900, html.dark .text-amber-950 { color:#fcd34d !important; }
+    html.dark .text-rose-700, html.dark .text-rose-800, html.dark .text-rose-900, html.dark .text-rose-950 { color:#fda4af !important; }
+    html.dark .hover\:text-rose-800:hover { color:#fecdd3 !important; }
+    html.dark .text-blue-800, html.dark .text-blue-900 { color:#93c5fd !important; }
+
+    html.dark .border-slate-100 { border-color:#1b2a42 !important; }
+    html.dark .border-slate-200 { border-color:#25364f !important; }
+    html.dark .border-slate-300 { border-color:#334766 !important; }
+    html.dark .divide-slate-100 > :not([hidden]) ~ :not([hidden]) { border-color:#1b2a42 !important; }
+    html.dark .border-emerald-200, html.dark .border-emerald-300 { border-color:rgba(16,185,129,.35) !important; }
+    html.dark .border-amber-200, html.dark .border-amber-300, html.dark .border-amber-200\/80 { border-color:rgba(245,158,11,.38) !important; }
+    html.dark .border-rose-200, html.dark .border-rose-300 { border-color:rgba(244,63,94,.40) !important; }
+    html.dark .border-blue-200 { border-color:rgba(59,130,246,.40) !important; }
+
+    html.dark input, html.dark select { color:#f1f5f9; }
+    html.dark input::placeholder { color:#64748b; }
+    html.dark .rep-tab-off:hover { opacity:.8; }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col antialiased selection:bg-emerald-200 selection:text-emerald-900 pb-16 md:pb-0">
+
+  <!-- TOP TELEMETRY BAR -->
+  <div class="bg-slate-950 text-slate-200 border-b border-slate-800 text-xs">
+    <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-2 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1.5 sm:gap-2">
+      <div class="flex flex-wrap items-center gap-2">
+        <span id="mode-badge" class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full font-semibold bg-amber-500/20 text-amber-300 border border-amber-500/40 text-[10px] sm:text-xs">
+          <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
+          SAMPLE / SIMULATED SENSOR STREAM
+        </span>
+        <span class="text-slate-400 hidden md:inline">|</span>
+        <span class="text-slate-300 font-mono-code text-[10px] sm:text-[11px] hidden sm:inline">
+          HARDWARE TARGET: ESP32 + ACS712 (30A) Non-Invasive Clamp
+        </span>
+      </div>
+      <div class="flex flex-wrap items-center justify-between sm:justify-end gap-2 sm:gap-3 font-mono-code text-[10px] sm:text-[11px]">
+        <span class="text-emerald-400">230V AC / 50Hz (CEB)</span>
+        <span class="text-slate-600">|</span>
+        <span id="live-clock" class="text-white font-semibold">2026-11-18 12:48:00 SLST</span>
+        <button id="theme-toggle" type="button" onclick="toggleTheme()" aria-label="Toggle dark mode" aria-pressed="false" title="Switch to dark mode"
+          class="inline-flex items-center gap-1.5 px-2 py-1 rounded-lg border border-slate-700 bg-slate-800 hover:bg-slate-700 text-slate-200 transition font-sans">
+          <svg id="icon-moon" class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
+          <svg id="icon-sun" class="w-3.5 h-3.5 hidden text-amber-300" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+          <span id="theme-label" class="hidden sm:inline text-[11px] font-semibold">Dark</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN APPLICATION HEADER -->
+  <header class="bg-slate-900 text-white shadow-md sticky top-0 z-30">
+    <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-3 sm:py-4 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 sm:gap-4">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-emerald-500 flex items-center justify-center shadow-lg shadow-emerald-500/20 shrink-0">
+          <svg class="w-5 h-5 sm:w-6 sm:h-6 text-slate-950" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+          </svg>
+        </div>
+        <div class="min-w-0">
+          <div class="flex flex-wrap items-center gap-2">
+            <h1 class="text-lg sm:text-2xl font-extrabold tracking-tight truncate">Watts Simulator</h1>
+          </div>
+          <p class="text-[11px] sm:text-sm text-slate-300 line-clamp-1 sm:line-clamp-none">
+            Boarding House &amp; Hostel CEB Tariff Slab Guard, Phantom Leakage Detector &amp; Fair Bill Splitter
+          </p>
+        </div>
+      </div>
+
+      <!-- Data Input Mode Switcher -->
+      <div class="flex flex-wrap items-center gap-2">
+        <div class="grid grid-cols-3 sm:inline-flex w-full sm:w-auto rounded-xl bg-slate-800 p-1 border border-slate-700" role="group">
+          <button id="btn-mode-sim" onclick="setDataMode('sim')" class="px-2.5 sm:px-3 py-1.5 rounded-lg text-[11px] sm:text-xs font-semibold transition bg-emerald-500 text-slate-950 shadow text-center">
+            Simulated
+          </button>
+          <button id="btn-mode-manual" onclick="setDataMode('manual')" class="px-2.5 sm:px-3 py-1.5 rounded-lg text-[11px] sm:text-xs font-semibold transition text-slate-300 hover:text-white text-center">
+            Manual Meter
+          </button>
+          <button id="btn-mode-serial" onclick="connectWebSerial()" class="px-2.5 sm:px-3 py-1.5 rounded-lg text-[11px] sm:text-xs font-semibold transition text-slate-300 hover:text-white flex items-center justify-center gap-1" title="Connect real ESP32 via USB Serial (Chrome/Edge)">
+            <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+            USB ESP32
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- PRIMARY NAVIGATION MENU BAR (Desktop & Tablet Top Bar) -->
+    <nav aria-label="Primary Page Navigation" class="hidden md:block bg-slate-950/60 border-t border-slate-800">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center gap-2 py-2">
+        <button id="nav-tab-home" onclick="switchPage('home')"
+          class="px-4 py-2 rounded-xl text-sm font-bold transition flex items-center gap-2 bg-emerald-500 text-slate-950 shadow">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+          </svg>
+          Home
+        </button>
+
+        <button id="nav-tab-simulator" onclick="switchPage('simulator')"
+          class="px-4 py-2 rounded-xl text-sm font-bold transition flex items-center gap-2 text-slate-300 hover:text-white hover:bg-slate-800">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+          </svg>
+          Live Simulator
+        </button>
+
+        <button id="nav-tab-roommate" onclick="switchPage('roommate')"
+          class="px-4 py-2 rounded-xl text-sm font-bold transition flex items-center gap-2 text-slate-300 hover:text-white hover:bg-slate-800">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+          </svg>
+          Units
+          <span id="nav-roommate-count" class="text-[11px] font-mono-code px-1.5 py-0.5 rounded-md bg-slate-800 text-emerald-400 border border-slate-700">4</span>
+        </button>
+
+        <button id="nav-tab-reports" onclick="switchPage('reports')"
+          class="px-4 py-2 rounded-xl text-sm font-bold transition flex items-center gap-2 text-slate-300 hover:text-white hover:bg-slate-800">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+          </svg>
+          Reports
+        </button>
+      </div>
+    </nav>
+  </header>
+
+  <!-- MOBILE BOTTOM NAVIGATION BAR -->
+  <nav aria-label="Mobile Bottom Navigation" class="md:hidden fixed bottom-0 inset-x-0 z-40 bg-slate-900 border-t border-slate-800 shadow-2xl">
+    <div class="grid grid-cols-4 gap-1 p-1.5">
+      <button id="mob-tab-home" onclick="switchPage('home')"
+        class="flex flex-col items-center justify-center py-1.5 px-1 rounded-xl text-[11px] leading-tight text-center font-bold transition bg-emerald-500 text-slate-950">
+        <svg class="w-4 h-4 mb-0.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+        </svg>
+        Home
+      </button>
+
+      <button id="mob-tab-simulator" onclick="switchPage('simulator')"
+        class="flex flex-col items-center justify-center py-1.5 px-1 rounded-xl text-[11px] leading-tight text-center font-bold transition text-slate-300 hover:text-white">
+        <svg class="w-4 h-4 mb-0.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+        </svg>
+        Live Simulator
+      </button>
+
+      <button id="mob-tab-roommate" onclick="switchPage('roommate')"
+        class="flex flex-col items-center justify-center py-1.5 px-1 rounded-xl text-[11px] leading-tight text-center font-bold transition text-slate-300 hover:text-white relative">
+        <div class="flex items-center gap-1">
+          <svg class="w-4 h-4 mb-0.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+          </svg>
+          <span id="mob-roommate-count" class="text-[10px] font-mono-code px-1 rounded bg-slate-800 text-emerald-400">4</span>
+        </div>
+        Units
+      </button>
+
+      <button id="mob-tab-reports" onclick="switchPage('reports')"
+        class="flex flex-col items-center justify-center py-1.5 px-1 rounded-xl text-[11px] leading-tight text-center font-bold transition text-slate-300 hover:text-white">
+        <svg class="w-4 h-4 mb-0.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+        </svg>
+        Reports
+      </button>
+    </div>
+  </nav>
+
+  <!-- MAIN CONTENT CONTAINER -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6 space-y-5 sm:space-y-6">
+
+    <!-- =================================================================== -->
+    <!-- PAGE 1: HOME (10-Second Overview, Alerts, Manual Meter, Tariff)      -->
+    <!-- =================================================================== -->
+    <div id="page-home" class="space-y-5 sm:space-y-6">
+
+      <!-- 10-SECOND EXECUTIVE SUMMARY BANNER -->
+      <section aria-label="10-Second Status Overview" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4">
+
+        <!-- KPI 1: Live Active Power -->
+        <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200 flex flex-col justify-between">
+          <div class="flex items-start justify-between gap-2">
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-500">1. Live Room Load</span>
+            <span id="kpi-power-source" class="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-amber-50 text-amber-800 border border-amber-200">
+              Sample: Appliance Sum
+            </span>
+          </div>
+          <div class="my-2">
+            <div class="flex items-baseline gap-1.5">
+              <span id="kpi-watts" class="text-2xl sm:text-3xl font-extrabold text-slate-900 font-mono-code">275</span>
+              <span class="text-sm font-bold text-slate-500">W</span>
+            </div>
+            <p class="text-xs text-slate-600 font-mono-code mt-0.5">
+              Current: <span id="kpi-amps" class="font-semibold text-slate-800">1.20</span> A @ 230V <span class="text-[10px] text-amber-700">(ASSUMPTION)</span>
+            </p>
+          </div>
+          <div class="pt-2 border-t border-slate-100 text-[11px] text-slate-500 flex items-center justify-between">
+            <span>Formula: <code class="text-slate-700 font-mono-code">I = P / 230V</code></span>
+            <span id="kpi-time-1" class="font-mono-code text-[10px]">12:48:00</span>
+          </div>
+        </div>
+
+        <!-- KPI 2: Cumulative Monthly Units -->
+        <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200 flex flex-col justify-between">
+          <div class="flex items-start justify-between gap-2">
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-500">2. Projected 30-Day Units</span>
+            <span id="kpi-kwh-source" class="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-blue-50 text-blue-800 border border-blue-200">
+              Meter + Forecast
+            </span>
+          </div>
+          <div class="my-2">
+            <div class="flex items-baseline gap-1.5">
+              <span id="kpi-kwh" class="text-2xl sm:text-3xl font-extrabold text-slate-900 font-mono-code">85.6</span>
+              <span class="text-sm font-bold text-slate-500">kWh</span>
+            </div>
+            <p class="text-xs text-slate-600 mt-0.5">
+              Logged to Date: <span id="kpi-logged-kwh" class="font-mono-code font-semibold text-slate-800">58.0 kWh</span> (Day 20/30)
+            </p>
+          </div>
+          <div class="pt-2 border-t border-slate-100 text-[11px] text-slate-500 flex items-center justify-between">
+            <span><code class="text-slate-700 font-mono-code">kWh = kW × hrs</code></span>
+            <span class="text-[10px] text-amber-700 font-semibold">ASSUMPTION: 30d</span>
+          </div>
+        </div>
+
+        <!-- KPI 3: Projected Monthly CEB Bill -->
+        <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200 flex flex-col justify-between">
+          <div class="flex items-start justify-between gap-2">
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-500">3. Projected CEB Bill</span>
+            <span class="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-800 border border-emerald-200">
+              Source: CEB Tariff
+            </span>
+          </div>
+          <div class="my-2">
+            <div class="flex items-baseline gap-1.5">
+              <span class="text-sm font-bold text-slate-500">LKR</span>
+              <span id="kpi-bill" class="text-2xl sm:text-3xl font-extrabold text-emerald-700 font-mono-code">2,008</span>
+            </div>
+            <p class="text-xs text-slate-600 mt-0.5">
+              Avg Unit Cost: <span id="kpi-avg-rate" class="font-mono-code font-semibold text-slate-800">23.46</span> LKR/kWh
+            </p>
+          </div>
+          <div class="pt-2 border-t border-slate-100 text-[11px] text-slate-500 flex items-center justify-between">
+            <span>Includes Fixed Charge</span>
+            <a href="#tariff-section" class="text-emerald-700 font-semibold hover:underline">See Formula ↓</a>
+          </div>
+        </div>
+
+        <!-- KPI 4: CEB Tariff Slab Guard -->
+        <div id="kpi-slab-card" class="bg-amber-50 rounded-2xl p-4 shadow-sm border border-amber-300 flex flex-col justify-between">
+          <div class="flex items-start justify-between gap-2">
+            <span class="text-xs font-bold uppercase tracking-wider text-amber-900">4. CEB Tariff Slab Guard</span>
+            <span class="text-[10px] font-bold px-2 py-0.5 rounded-md bg-amber-200 text-amber-950">
+              BLOCK 3 (61–90)
+            </span>
+          </div>
+          <div class="my-2">
+            <div id="kpi-slab-status" class="text-base sm:text-lg font-extrabold text-amber-950 leading-tight">
+              4.4 kWh below 90-Unit Spike!
+            </div>
+            <p id="kpi-slab-detail" class="text-xs text-amber-900 mt-1">
+              Crossing 90 kWh jumps rate to <strong>LKR 50.00/kWh</strong> + higher fixed fee.
+            </p>
+          </div>
+          <div class="pt-2 border-t border-amber-200/80 text-[11px] text-amber-900 font-mono-code">
+            Buffer = 90.0 - Projected kWh
+          </div>
+        </div>
+
+        <!-- KPI 5: Phantom / Standby Leakage Alert -->
+        <div id="kpi-leak-card" class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200 flex flex-col justify-between sm:col-span-2 lg:col-span-1">
+          <div class="flex items-start justify-between gap-2">
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-500">5. Standby Leakage Check</span>
+            <span class="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 border border-slate-200">
+              Threshold: 45W
+            </span>
+          </div>
+          <div class="my-2">
+            <div id="kpi-leak-status" class="text-base sm:text-lg font-extrabold text-emerald-700 leading-tight">
+              Normal Baseline (15W)
+            </div>
+            <p id="kpi-leak-detail" class="text-xs text-slate-600 mt-1">
+              Unexplained phantom load: <strong>15W</strong> (~10.8 kWh/mo).
+            </p>
+          </div>
+          <div class="pt-2 border-t border-slate-100 text-[11px] text-slate-500">
+            <span class="text-amber-700 font-semibold">ASSUMPTION:</span> 45W max idle
+          </div>
+        </div>
+
+      </section>
+
+      <!-- PHANTOM LEAKAGE ALERT BANNER -->
+      <div id="leakage-alert-banner" class="hidden rounded-2xl bg-rose-50 border-2 border-rose-300 p-4 shadow-sm">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div class="flex items-start gap-3">
+            <div class="w-10 h-10 rounded-xl bg-rose-600 text-white flex items-center justify-center shrink-0 mt-0.5">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+            </div>
+            <div>
+              <div class="flex flex-wrap items-center gap-2">
+                <h2 class="text-sm font-extrabold text-rose-950 uppercase tracking-wide">
+                  Phantom / Standby Leakage Warning (&gt; 45W Threshold)
+                </h2>
+                <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-rose-200 text-rose-900">
+                  ASSUMPTION: 1 Mini-Fridge + Router Baseline = 45W Max
+                </span>
+              </div>
+              <p id="leakage-banner-text" class="text-xs sm:text-sm text-rose-900 mt-1">
+                Detected <strong>85W</strong> of continuous standby/faulty-wiring draw (40W above normal baseline). Over 30 days (720 hours), this wastes <strong>28.8 kWh</strong>.
+              </p>
+            </div>
+          </div>
+          <div class="bg-white rounded-xl px-4 py-2.5 border border-rose-200 text-left sm:text-right shrink-0">
+            <div class="text-[10px] font-bold uppercase text-slate-500">Estimated Monthly Waste</div>
+            <div id="leakage-banner-cost" class="text-lg font-extrabold text-rose-700 font-mono-code">LKR 1,440 / mo</div>
+            <div class="text-[10px] text-slate-500 font-mono-code">Formula: (Excess W / 1000) × 720h × Marginal Rate</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- MANUAL METER ENTRY PANEL -->
+      <section id="manual-meter-panel" class="hidden bg-white rounded-2xl p-4 sm:p-5 shadow-sm border-2 border-emerald-500">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-4 border-b border-slate-100">
+          <div>
+            <span class="text-[11px] font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-md border border-emerald-200">
+              REAL FIELD DATA MODE • MANUAL CEB METER LOG
+            </span>
+            <h2 class="text-base sm:text-lg font-bold text-slate-900 mt-1">Enter Real Boarding House Meter Readings</h2>
+            <p class="text-xs text-slate-600">
+              Use actual kWh numbers photographed from your <em>Bodima</em> CEB meter to calculate exact bill projection without simulated appliance assumptions.
+            </p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mt-4">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">
+              Previous Bill Meter Reading (kWh)
+              <span class="block text-[10px] font-normal text-slate-500">Source: Printed CEB Bill</span>
+            </label>
+            <input id="manual-prev-kwh" type="number" step="0.1" value="1420.0" oninput="recalculateAll()" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm font-mono-code font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">
+              Current Meter Reading Today (kWh)
+              <span class="block text-[10px] font-normal text-slate-500">Source: Physical CEB Meter</span>
+            </label>
+            <input id="manual-curr-kwh" type="number" step="0.1" value="1478.0" oninput="recalculateAll()" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm font-mono-code font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">
+              Days Elapsed in Billing Cycle
+              <span class="block text-[10px] font-normal text-slate-500">Out of 30-day cycle (Assumption)</span>
+            </label>
+            <input id="manual-days" type="number" min="1" max="30" value="20" oninput="recalculateAll()" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm font-mono-code font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">
+              Measured Instant Load (W)
+              <span class="block text-[10px] font-normal text-slate-500">From Meter Blink Rate / Clamp</span>
+            </label>
+            <input id="manual-watts" type="number" min="0" step="5" value="240" oninput="recalculateAll()" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm font-mono-code font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+          </div>
+        </div>
+      </section>
+
+      <!-- CEB DOMESTIC TARIFF SLAB BREAKDOWN -->
+      <section id="tariff-section" class="bg-white rounded-2xl p-4 sm:p-5 shadow-sm border border-slate-200 flex flex-col justify-between">
+        <div>
+          <div class="flex flex-wrap items-start justify-between gap-2 pb-4 border-b border-slate-100">
+            <div>
+              <div class="flex items-center gap-2">
+                <h2 class="text-base sm:text-lg font-extrabold text-slate-900">CEB Domestic Tariff Breakdown</h2>
+              </div>
+              <p class="text-xs text-slate-600 mt-1">
+                Source: <strong>PUCSL / Ceylon Electricity Board (CEB) Domestic Block Tariff</strong>. Rates are editable below to match your exact printed bill.
+              </p>
+            </div>
+            <button onclick="resetDefaultTariffs()" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 shrink-0">
+              Reset Rates
+            </button>
+          </div>
+
+          <div class="mt-4 overflow-x-auto -mx-2 px-2">
+            <table class="w-full min-w-[460px] text-left border-collapse text-xs">
+              <thead>
+                <tr class="border-b-2 border-slate-200 text-slate-500 uppercase text-[10px] tracking-wider">
+                  <th class="py-2 pr-2">CEB Slab Block</th>
+                  <th class="py-2 px-2 text-right">Rate (LKR/kWh)</th>
+                  <th class="py-2 px-2 text-right">Your Units</th>
+                  <th class="py-2 pl-2 text-right">Cost (LKR)</th>
+                </tr>
+              </thead>
+              <tbody id="tariff-table-body" class="divide-y divide-slate-100 font-mono-code">
+                <!-- Populated dynamically -->
+              </tbody>
+              <tfoot class="border-t-2 border-slate-300 font-mono-code text-xs">
+                <tr class="bg-slate-50">
+                  <td colspan="3" class="py-2 pr-2 font-sans font-semibold text-slate-700">
+                    Energy Charge Subtotal
+                  </td>
+                  <td id="tariff-energy-subtotal" class="py-2 pl-2 text-right font-bold text-slate-900">
+                    0.00
+                  </td>
+                </tr>
+                <tr class="bg-slate-50">
+                  <td colspan="2" class="py-2 pr-2 font-sans font-semibold text-slate-700">
+                    Monthly Fixed Charge (<span id="tariff-fixed-tier" class="font-mono-code text-[11px]">Block 3</span>)
+                  </td>
+                  <td class="py-2 px-2 text-right">
+                    <input id="custom-fixed-charge" type="number" step="10" value="400" oninput="onCustomFixedInput()" class="w-16 text-right rounded border border-slate-300 px-1.5 py-1 text-xs bg-white" title="Editable Fixed Charge (LKR)" />
+                  </td>
+                  <td id="tariff-fixed-display" class="py-2 pl-2 text-right font-bold text-slate-900">
+                    400.00
+                  </td>
+                </tr>
+                <tr class="bg-emerald-50 text-emerald-950">
+                  <td colspan="3" class="py-3 pr-2 font-sans font-extrabold text-sm">
+                    TOTAL PROJECTED CEB BILL
+                  </td>
+                  <td id="tariff-grand-total" class="py-3 pl-2 text-right font-extrabold text-base text-emerald-800">
+                    LKR 0.00
+                  </td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        </div>
+
+        <!-- Tariff Formula & Citation Box -->
+        <div class="mt-4 p-3.5 rounded-xl bg-emerald-950 text-emerald-100 text-xs space-y-1.5">
+          <div class="font-bold text-emerald-400 uppercase tracking-wider text-[11px]">
+            Bill Calculation Formula &amp; Source Citation
+          </div>
+          <p class="font-mono-code text-[11px] leading-relaxed break-words">
+            Total Bill (LKR) = Σ(Units in Block<sub>i</sub> × Rate<sub>i</sub>) + Fixed Monthly Charge<sub>(Highest Block)</sub>
+          </p>
+          <p class="text-[11px] text-emerald-200/90">
+            <strong>Data Source:</strong> PUCSL Approved CEB Domestic Tariff Schedule (0–30, 31–60, 61–90, 91–120, 121–180 kWh blocks). Note: In Sri Lanka, domestic consumers exceeding 60 kWh/month move from the subsidized Block 1–2 structure to higher incremental slab rates.
+          </p>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- =================================================================== -->
+    <!-- PAGE 2: LIVE SIMULATOR (Add/Delete Room Appliances, Unit Count, W)   -->
+    <!-- =================================================================== -->
+    <div id="page-simulator" class="hidden space-y-5 sm:space-y-6">
+
+      <!-- Mini Live Telemetry Strip -->
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        <div class="bg-white rounded-xl p-3.5 border border-slate-200 shadow-sm">
+          <div class="text-[10px] font-bold uppercase text-slate-500">Live Load</div>
+          <div class="text-lg sm:text-xl font-extrabold font-mono-code text-slate-900 mt-0.5"><span id="sim-strip-watts">275</span> W</div>
+        </div>
+        <div class="bg-white rounded-xl p-3.5 border border-slate-200 shadow-sm">
+          <div class="text-[10px] font-bold uppercase text-slate-500">Projected 30d Units</div>
+          <div class="text-lg sm:text-xl font-extrabold font-mono-code text-slate-900 mt-0.5"><span id="sim-strip-kwh">85.6</span> kWh</div>
+        </div>
+        <div class="bg-white rounded-xl p-3.5 border border-slate-200 shadow-sm">
+          <div class="text-[10px] font-bold uppercase text-slate-500">Projected CEB Bill</div>
+          <div class="text-lg sm:text-xl font-extrabold font-mono-code text-emerald-700 mt-0.5">LKR <span id="sim-strip-bill">2,008</span></div>
+        </div>
+        <div class="bg-white rounded-xl p-3.5 border border-slate-200 shadow-sm">
+          <div class="text-[10px] font-bold uppercase text-slate-500">Active CEB Tier</div>
+          <div id="sim-strip-block" class="text-lg sm:text-xl font-extrabold font-mono-code text-amber-700 mt-0.5">Block 3</div>
+        </div>
+      </div>
+
+      <!-- INTERACTIVE APPLIANCE MANAGER & LIVE HARDWARE FEED -->
+      <section class="bg-white rounded-2xl p-4 sm:p-5 shadow-sm border border-slate-200 flex flex-col justify-between">
+        <div>
+          <div class="flex flex-col md:flex-row md:items-start justify-between gap-3 pb-4 border-b border-slate-100">
+            <div>
+              <div class="flex flex-wrap items-center gap-2">
+                <h2 class="text-base sm:text-lg font-extrabold text-slate-900">Live Boarding Room Load Simulator</h2>
+                <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-amber-100 text-amber-900 border border-amber-300">
+                  SAMPLE / DEMO CONTROLS
+                </span>
+              </div>
+              <p class="text-xs text-slate-600 mt-1">
+                Add or delete room appliances, adjust total unit counts, and toggle power ON/OFF to calculate live current (<code class="font-mono-code">A</code>), daily <code class="font-mono-code">kWh</code>, and CEB slab jumps.
+              </p>
+            </div>
+            <div class="grid grid-cols-3 sm:flex items-center gap-2">
+              <button onclick="setQuickScenario('normal')" class="px-2.5 py-2 rounded-lg text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-800 transition text-center">
+                Normal Evening
+              </button>
+              <button onclick="setQuickScenario('spike')" class="px-2.5 py-2 rounded-lg text-xs font-semibold bg-amber-100 hover:bg-amber-200 text-amber-950 transition text-center">
+                Slab Spike!
+              </button>
+              <button onclick="setQuickScenario('leak')" class="px-2.5 py-2 rounded-lg text-xs font-semibold bg-rose-100 hover:bg-rose-200 text-rose-900 transition text-center">
+                Leakage
+              </button>
+            </div>
+          </div>
+
+          <!-- Meter-to-Date Baseline Slider -->
+          <div class="mt-4 p-3.5 rounded-xl bg-slate-50 border border-slate-200">
+            <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+              <label for="logged-kwh-slider" class="text-xs font-bold text-slate-800">
+                Units Already Recorded on CEB Meter (Days 1–20):
+              </label>
+              <div class="flex items-center gap-2">
+                <span class="text-[10px] font-semibold px-2 py-0.5 rounded bg-blue-100 text-blue-900 hidden sm:inline">
+                  SOURCE: Sample Meter Log
+                </span>
+                <span id="logged-kwh-display" class="text-sm font-extrabold font-mono-code text-slate-900">58.0 kWh</span>
+              </div>
+            </div>
+            <input id="logged-kwh-slider" type="range" min="10" max="150" step="1" value="58" oninput="onSliderChange(this.value)" class="w-full h-2 accent-emerald-600 cursor-pointer" />
+            <div class="flex justify-between text-[10px] text-slate-500 font-mono-code mt-1.5">
+              <span>10 kWh</span>
+              <span>60 kWh (B2)</span>
+              <span>90 kWh (B3)</span>
+              <span>150 kWh</span>
+            </div>
+          </div>
+
+          <!-- ADD ROOM APPLIANCE FORM (Unit Name, Total of Units, Wattage) -->
+          <form onsubmit="addAppliance(event)" class="mt-4 p-3.5 sm:p-4 rounded-xl bg-emerald-50/70 border border-emerald-200 grid grid-cols-1 sm:grid-cols-12 gap-3 items-end">
+            <div class="sm:col-span-4">
+              <label for="new-app-name" class="block text-xs font-bold text-slate-800 mb-1">
+                Unit Name
+              </label>
+              <input id="new-app-name" type="text" required placeholder="e.g., Gaming PC / Study Lamp"
+                class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs font-semibold bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+            </div>
+            <div class="grid grid-cols-3 gap-2 sm:col-span-5">
+              <div>
+                <label for="new-app-units" class="block text-xs font-bold text-slate-800 mb-1">
+                  Total of Unit
+                </label>
+                <input id="new-app-units" type="number" min="1" max="50" step="1" value="1" required
+                  class="w-full rounded-xl border border-slate-300 px-2.5 py-2 text-xs font-mono-code bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+              </div>
+              <div>
+                <label for="new-app-watts" class="block text-xs font-bold text-slate-800 mb-1">
+                  Wattage (W)
+                </label>
+                <input id="new-app-watts" type="number" min="1" max="10000" step="1" placeholder="65" required
+                  class="w-full rounded-xl border border-slate-300 px-2.5 py-2 text-xs font-mono-code bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+              </div>
+              <div>
+                <label for="new-app-hours" class="block text-xs font-bold text-slate-800 mb-1">
+                  Hrs / Day
+                </label>
+                <input id="new-app-hours" type="number" min="0.1" max="24" step="0.1" value="4.0" required
+                  class="w-full rounded-xl border border-slate-300 px-2.5 py-2 text-xs font-mono-code bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+              </div>
+            </div>
+            <div class="sm:col-span-3">
+              <button type="submit"
+                class="w-full px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-sm transition flex items-center justify-center gap-1.5">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                </svg>
+                Add Appliance
+              </button>
+            </div>
+          </form>
+
+          <!-- Appliance Cards Grid -->
+          <div class="mt-4">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1 mb-2">
+              <span class="text-xs font-bold uppercase tracking-wider text-slate-500">
+                Room Appliances (<span id="appliance-count-label">8</span> Units Configured)
+              </span>
+              <span class="text-[11px] text-amber-800 font-medium">
+                *Total Load = Unit Count × Wattage per Unit
+              </span>
+            </div>
+
+            <div id="appliance-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+              <!-- Populated deterministically by JS -->
+            </div>
+          </div>
+
+          <!-- Standby / Phantom Leakage Simulation Control -->
+          <div class="mt-4 p-3.5 rounded-xl bg-slate-50 border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <div class="flex flex-wrap items-center gap-2">
+                <span class="text-xs font-bold text-slate-800">Unexplained Standby / Leakage Load (W)</span>
+                <span class="text-[10px] font-semibold px-2 py-0.5 rounded bg-amber-100 text-amber-900">ASSUMPTION</span>
+              </div>
+              <p class="text-[11px] text-slate-600 mt-0.5">
+                Simulates old fridge compressor seal leak, chargers left plugged in, or earth leakage (Threshold: 45W).
+              </p>
+            </div>
+            <div class="flex items-center gap-2 shrink-0">
+              <input id="standby-watts-input" type="number" min="0" max="500" step="5" value="15" oninput="recalculateAll()" class="w-24 rounded-lg border border-slate-300 px-3 py-2 text-sm font-mono-code font-bold text-right bg-white" />
+              <span class="text-xs font-bold text-slate-600">W</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Explicit Formula Box -->
+        <div class="mt-5 p-3.5 rounded-xl bg-slate-900 text-slate-200 text-xs space-y-1.5">
+          <div class="flex items-center justify-between">
+            <span class="font-bold text-emerald-400 uppercase tracking-wider text-[11px]">
+              Live Telemetry &amp; Projection Formulas
+            </span>
+            <span class="font-mono-code text-[10px] text-slate-400">Updated Live</span>
+          </div>
+          <div class="font-mono-code text-[11px] leading-relaxed text-slate-300 space-y-1 break-words">
+            <div>1. <span class="text-white">Active Power (W)</span> = Σ(Active Unit Count × Unit Watts) + Standby Leakage Watts</div>
+            <div>2. <span class="text-white">Line Current (A)</span> = Active Power (W) ÷ 230V <span class="text-amber-300">[ASSUMPTION: Sri Lanka Nominal Phase Voltage]</span></div>
+            <div>3. <span class="text-white">Remaining 10-Day Forecast (kWh)</span> = Σ(Active Total kW × Est. Daily Hrs) × 10 Days + (Standby kW × 240h)</div>
+            <div>4. <span class="text-white">Projected 30-Day Total (kWh)</span> = Logged Meter kWh (Days 1–20) + Remaining 10-Day Forecast kWh</div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- =================================================================== -->
+    <!-- PAGE 3: ROOMMATE FAIR BILL SPLITTER (Name, Unit Name, Count of Units)-->
+    <!-- =================================================================== -->
+    <div id="page-roommate" class="hidden space-y-5 sm:space-y-6">
+
+      <section class="bg-white rounded-2xl p-4 sm:p-5 shadow-sm border border-slate-200 space-y-5">
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3 pb-4 border-b border-slate-100">
+          <div>
+            <div class="flex flex-wrap items-center gap-2">
+              <h2 class="text-base sm:text-lg font-extrabold text-slate-900">Roommate Fair Bill Splitter (Anti-Conflict Calculator)</h2>
+              <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-100 text-emerald-900 border border-emerald-300">
+                SOLVES HOSTEL DISPUTES
+              </span>
+            </div>
+            <p class="text-xs text-slate-600 mt-1">
+              Assign personal appliances to each roommate by <strong>Roommate Name</strong>, <strong>Unit Name</strong>, and <strong>Count of Units</strong> (plus monthly hours) to calculate their exact fair bill share.
+            </p>
+          </div>
+          <div id="roommate-formula-box" class="text-[11px] sm:text-xs font-mono-code bg-slate-100 px-3 py-2 rounded-xl border border-slate-200 text-slate-800">
+            Formula: <strong>Share<sub>i</sub> = (Shared Base Bill ÷ 4) + (Personal kWh<sub>i</sub> × Effective Rate)</strong>
+          </div>
+        </div>
+
+        <!-- ADD ROOMMATE FORM (Roommate Name, Unit Name, Count of Units, Monthly Hrs) -->
+        <form onsubmit="addRoommate(event)" class="p-3.5 sm:p-4 rounded-xl bg-emerald-50/70 border border-emerald-200 grid grid-cols-1 sm:grid-cols-12 gap-3 items-end">
+          <div class="sm:col-span-3">
+            <label for="new-roommate-name" class="block text-xs font-bold text-slate-800 mb-1">
+              Roommate Name
+            </label>
+            <input id="new-roommate-name" type="text" required placeholder="e.g., Kavindu (Room C)"
+              class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs font-semibold bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+          </div>
+          <div class="sm:col-span-4">
+            <label for="new-roommate-unit" class="block text-xs font-bold text-slate-800 mb-1">
+              Unit Name (Personal Appliance)
+            </label>
+            <input id="new-roommate-unit" list="roommate-unit-options" type="text" required placeholder="Select or type unit name..."
+              class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs font-semibold bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+            <datalist id="roommate-unit-options">
+              <!-- Synced dynamically with Room Appliances -->
+            </datalist>
+          </div>
+          <div class="grid grid-cols-2 gap-2 sm:col-span-3">
+            <div>
+              <label for="new-roommate-count" class="block text-xs font-bold text-slate-800 mb-1">
+                Count of Units
+              </label>
+              <input id="new-roommate-count" type="number" min="1" max="20" step="1" value="1" required
+                class="w-full rounded-xl border border-slate-300 px-2.5 py-2 text-xs font-mono-code bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+            </div>
+            <div>
+              <label for="new-roommate-hours" class="block text-xs font-bold text-slate-800 mb-1">
+                Hrs / Month
+              </label>
+              <input id="new-roommate-hours" type="number" min="0" max="720" step="0.5" value="5" required
+                class="w-full rounded-xl border border-slate-300 px-2.5 py-2 text-xs font-mono-code bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+            </div>
+          </div>
+          <div class="sm:col-span-2">
+            <button type="submit"
+              class="w-full px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-sm transition flex items-center justify-center gap-1.5">
+              <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+              </svg>
+              Add Roommate
+            </button>
+          </div>
+        </form>
+
+        <!-- ROOMMATE CARDS GRID (Editable Roommate Name, Unit Name, Count of Units, Hrs/mo) -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-4" id="roommate-cards">
+          <!-- Populated deterministically by JS -->
+        </div>
+
+        <!-- SUMMARY FOOTER -->
+        <div class="pt-3 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs text-slate-600">
+          <div id="roommate-assumption-note">
+            <span class="font-bold text-amber-800">ASSUMPTION:</span> Shared base load is divided equally among roommates; personal unit kWh = (Count of Units × Unit Wattage ÷ 1000) × Monthly Hours.
+          </div>
+          <div class="font-mono-code font-bold text-slate-900 shrink-0">
+            Sum of Roommate Shares: <span id="roommate-sum-check" class="text-emerald-700">LKR 0.00</span>
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- =================================================================== -->
+    <!-- PAGE 4: REPORTS (Daily & Monthly, charts)                            -->
+    <!-- =================================================================== -->
+    <div id="page-reports" class="hidden space-y-5 sm:space-y-6">
+
+      <section class="bg-white rounded-2xl p-4 sm:p-5 shadow-sm border border-slate-200">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <div class="flex flex-wrap items-center gap-2">
+              <h2 class="text-base sm:text-lg font-extrabold text-slate-900">Energy &amp; Bill Reports</h2>
+              <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-blue-100 text-blue-900 border border-blue-200">LIVE FROM SIMULATOR DATA</span>
+            </div>
+            <p class="text-xs text-slate-600 mt-1">Charts update automatically when you change appliances, meter readings, tariff rates or roommates.</p>
+          </div>
+          <div class="inline-flex rounded-xl bg-slate-100 p-1 border border-slate-200 self-start sm:self-auto" role="group" aria-label="Report type">
+            <button id="rep-tab-daily" type="button" onclick="setReportTab('daily')" class="px-4 py-1.5 rounded-lg text-xs font-bold transition bg-emerald-500 text-slate-950 shadow">Daily Report</button>
+            <button id="rep-tab-monthly" type="button" onclick="setReportTab('monthly')" class="rep-tab-off px-4 py-1.5 rounded-lg text-xs font-bold transition text-slate-600">Monthly Report</button>
+          </div>
+        </div>
+      </section>
+
+      <div id="report-daily" class="space-y-5 sm:space-y-6"></div>
+      <div id="report-monthly" class="hidden space-y-5 sm:space-y-6"></div>
+
+    </div>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="bg-slate-900 text-slate-400 text-xs mt-8 border-t border-slate-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left">
+      <div>
+        <span class="font-bold text-white">Watts Simulator <br>
+          @BHOOM</span> — <span class="text-emerald-400 font-bold">SLIIT</span>
+        </span> — Built Y1S1 &amp; alians
+      </div>
+      <div class="font-mono-code text-[11px] text-slate-400">
+        All values traceable • Zero random numbers • Live SLST Clock Active
+      </div>
+    </div>
+  </footer>
+
+  <!-- CUSTOM MESSAGE BOX -->
+  <div id="toast-box" class="hidden fixed bottom-20 md:bottom-5 left-3 right-3 sm:left-auto sm:right-5 z-50 sm:max-w-sm bg-slate-900 text-white px-4 py-3 rounded-xl shadow-xl border border-slate-700 text-xs">
+    <div id="toast-message" class="font-medium"></div>
+  </div>
+
+  <script>
+    // =========================================================================
+    // 1. DETERMINISTIC DATA MODELS & EXPLICIT ASSUMPTIONS
+    // =========================================================================
+
+    const GRID_VOLTAGE_V = 230; // ASSUMPTION: Nominal Sri Lanka single-phase voltage (230V AC)
+    const STANDBY_THRESHOLD_W = 45; // ASSUMPTION: Max normal idle draw (1 mini-fridge idle + Wi-Fi router)
+
+    // Appliance catalog with unit count & per-unit wattage
+    const appliances = [
+      { id: 'fridge', name: 'Mini Fridge (Compressor)', units: 1, watts: 110, dailyHours: 12.0, active: true, note: 'ASSUMPTION: 50% duty cycle' },
+      { id: 'fan', name: 'Pedestal Fan', units: 2, watts: 55, dailyHours: 8.0, active: true, note: 'ASSUMPTION: 55W per fan' },
+      { id: 'lights', name: 'LED Bulb (10W)', units: 4, watts: 10, dailyHours: 5.0, active: true, note: 'ASSUMPTION: Evening study hrs' },
+      { id: 'laptop', name: 'Laptop Charger', units: 2, watts: 65, dailyHours: 6.0, active: false, note: 'ASSUMPTION: 65W per laptop' },
+      { id: 'rice', name: 'Electric Rice Cooker', units: 1, watts: 700, dailyHours: 0.8, active: false, note: 'ASSUMPTION: 48 mins/day' },
+      { id: 'iron', name: 'Clothes Iron (Heavy)', units: 1, watts: 1000, dailyHours: 0.4, active: false, note: 'ASSUMPTION: 24 mins/day' },
+      { id: 'kettle', name: 'Electric Kettle (1.8L)', units: 1, watts: 1500, dailyHours: 0.3, active: false, note: 'ASSUMPTION: 18 mins/day' },
+      { id: 'heater', name: 'Immersion Water Heater', units: 1, watts: 1200, dailyHours: 0.25, active: false, note: 'ASSUMPTION: 15 mins/day' }
+    ];
+
+    // Default CEB Domestic Tariff Blocks (Source: PUCSL / CEB Domestic Tariff Structure - Editable by User)
+    const defaultTariffBlocks = [
+      { id: 'b1', label: 'Block 1 (0 – 30 kWh)', min: 0, max: 30, rate: 8.00, fixed: 150 },
+      { id: 'b2', label: 'Block 2 (31 – 60 kWh)', min: 30, max: 60, rate: 20.00, fixed: 300 },
+      { id: 'b3', label: 'Block 3 (61 – 90 kWh)', min: 60, max: 90, rate: 30.00, fixed: 400 },
+      { id: 'b4', label: 'Block 4 (91 – 120 kWh)', min: 90, max: 120, rate: 50.00, fixed: 1000 },
+      { id: 'b5', label: 'Block 5 (121 – 180 kWh)', min: 120, max: 180, rate: 50.00, fixed: 1500 },
+      { id: 'b6', label: 'Block 6 (> 180 kWh)', min: 180, max: Infinity, rate: 75.00, fixed: 2000 }
+    ];
+
+    // NOTE: do not JSON-clone: JSON.stringify turns Infinity into null and breaks Block 6
+    const cloneTariffs = () => defaultTariffBlocks.map(b => ({ ...b }));
+    let tariffBlocks = cloneTariffs();
+
+    // Roommate Fair Bill Splitter State (Roommate Name, Unit Name, Count of Units, Monthly Hours)
+    const roommates = [
+      { name: 'Kasun (Room A)', unitName: 'Electric Kettle (1.8L)', unitCount: 1, monthlyHours: 6.0 },
+      { name: 'Nimal (Room A)', unitName: 'Laptop Charger', unitCount: 1, monthlyHours: 45.0 },
+      { name: 'Tharindu (Room B)', unitName: 'Clothes Iron (Heavy)', unitCount: 1, monthlyHours: 8.0 },
+      { name: 'Sahan (Room B)', unitName: 'Pedestal Fan', unitCount: 1, monthlyHours: 90.0 }
+    ];
+
+    let currentMode = 'sim'; // 'sim' | 'manual' | 'serial'
+    let currentPage = 'home'; // 'home' | 'simulator' | 'roommate' (Units) | 'reports'
+    let lastCalc = null; // snapshot of the latest calculation, used by the Reports page
+    let serialWatts = null;
+    let manualFixedOverride = null;
+
+    // =========================================================================
+    // 2. PAGE NAVIGATION MENU BAR HANDLER
+    // =========================================================================
+
+    function switchPage(page) {
+      currentPage = page;
+      const pages = ['home', 'simulator', 'roommate', 'reports'];
+
+      pages.forEach(p => {
+        const sectionEl = document.getElementById(`page-${p}`);
+        const desktopTab = document.getElementById(`nav-tab-${p}`);
+        const mobileTab = document.getElementById(`mob-tab-${p}`);
+
+        if (p === page) {
+          sectionEl.classList.remove('hidden');
+          if (desktopTab) {
+            desktopTab.className = 'px-4 py-2 rounded-xl text-sm font-bold transition flex items-center gap-2 bg-emerald-500 text-slate-950 shadow';
+          }
+          if (mobileTab) {
+            mobileTab.className = 'flex flex-col items-center justify-center py-1.5 px-1 rounded-xl text-[11px] leading-tight text-center font-bold transition bg-emerald-500 text-slate-950';
+          }
+        } else {
+          sectionEl.classList.add('hidden');
+          if (desktopTab) {
+            desktopTab.className = 'px-4 py-2 rounded-xl text-sm font-bold transition flex items-center gap-2 text-slate-300 hover:text-white hover:bg-slate-800';
+          }
+          if (mobileTab) {
+            mobileTab.className = 'flex flex-col items-center justify-center py-1.5 px-1 rounded-xl text-[11px] leading-tight text-center font-bold transition text-slate-300 hover:text-white';
+          }
+        }
+      });
+
+      if (page === 'reports') renderReports();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // =========================================================================
+    // 3. INITIALIZATION & LIVE SRI LANKA STANDARD TIME (SLST) CLOCK
+    // =========================================================================
+
+    function updateClock() {
+      const now = new Date();
+      const options = {
+        timeZone: 'Asia/Colombo',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hourCycle: 'h23'
+      };
+      const parts = new Intl.DateTimeFormat('en-CA', options).formatToParts(now);
+      const map = {};
+      parts.forEach(p => { map[p.type] = p.value; });
+      const formattedFull = `${map.year}-${map.month}-${map.day} ${map.hour}:${map.minute}:${map.second} SLST`;
+      const formattedShort = `${map.hour}:${map.minute}:${map.second}`;
+
+      document.getElementById('live-clock').textContent = formattedFull;
+      document.getElementById('kpi-time-1').textContent = formattedShort;
+    }
+
+    let toastTimer = null;
+    function showToast(msg) {
+      const box = document.getElementById('toast-box');
+      document.getElementById('toast-message').textContent = msg;
+      box.classList.remove('hidden');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => box.classList.add('hidden'), 4500);
+    }
+
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    // Helper to resolve wattage for any unit name (matches Room Appliances or falls back to sensible defaults)
+    function resolveUnitWattage(unitName) {
+      const clean = (unitName || '').trim().toLowerCase();
+      if (!clean) return 100;
+
+      const exact = appliances.find(a => a.name.toLowerCase() === clean);
+      if (exact) return exact.watts;
+
+      const partial = clean.length < 3 ? null : appliances.find(a =>
+        clean.includes(a.name.toLowerCase()) || a.name.toLowerCase().includes(clean)
+      );
+      if (partial) return partial.watts;
+
+      if (clean.includes('kettle')) return 1500;
+      if (clean.includes('iron')) return 1000;
+      if (clean.includes('heater') || clean.includes('geyser')) return 1200;
+      if (clean.includes('rice')) return 700;
+      if (clean.includes('fridge')) return 110;
+      if (clean.includes('laptop') || clean.includes('pc') || clean.includes('computer')) return 65;
+      if (clean.includes('fan')) return 55;
+      if (clean.includes('bulb') || clean.includes('led') || clean.includes('lamp')) return 10;
+      return 100;
+    }
+
+    function syncUnitOptionsDatalist() {
+      const datalist = document.getElementById('roommate-unit-options');
+      if (!datalist) return;
+      datalist.innerHTML = appliances
+        .map(app => `<option value="${escapeHtml(app.name)}">${escapeHtml(app.name)} (${app.watts}W)</option>`)
+        .join('');
+    }
+
+    // =========================================================================
+    // 4. RENDERING & CRUD FOR ROOM APPLIANCES (Add, Delete, Unit Count, Toggle)
+    // =========================================================================
+
+    function renderAppliances() {
+      const grid = document.getElementById('appliance-grid');
+      const countLabel = document.getElementById('appliance-count-label');
+      if (countLabel) countLabel.textContent = appliances.length;
+
+      syncUnitOptionsDatalist();
+
+      if (appliances.length === 0) {
+        grid.innerHTML = `
+          <div class="col-span-full p-6 text-center rounded-xl border-2 border-dashed border-slate-300 text-slate-500 text-xs">
+            No room appliances configured. Use the form above to add a unit.
+          </div>
+        `;
+        return;
+      }
+
+      grid.innerHTML = appliances.map((app, index) => {
+        const totalWatts = app.units * app.watts;
+        const dailyKwh = ((totalWatts / 1000) * app.dailyHours).toFixed(2);
+        const activeClasses = app.active
+          ? 'bg-emerald-50/90 border-emerald-500 ring-1 ring-emerald-500'
+          : 'bg-white border-slate-200 hover:border-slate-300';
+        const pillClasses = app.active
+          ? 'bg-emerald-600 text-white'
+          : 'bg-slate-200 text-slate-600';
+
+        return `
+          <div class="p-3.5 rounded-xl border transition flex flex-col justify-between gap-2 ${activeClasses}">
+            <div class="flex items-start justify-between gap-2">
+              <button type="button" onclick="toggleAppliance(${index})" class="text-left flex-1 min-w-0">
+                <span class="text-xs font-extrabold text-slate-900 block truncate" title="${escapeHtml(app.name)}">
+                  ${escapeHtml(app.name)}
+                </span>
+              </button>
+              <div class="flex items-center gap-1 shrink-0">
+                <button type="button" onclick="toggleAppliance(${index})"
+                  class="text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase ${pillClasses}">
+                  ${app.active ? 'ON' : 'OFF'}
+                </button>
+                <button type="button" onclick="deleteAppliance(${index})"
+                  title="Delete ${escapeHtml(app.name)}"
+                  class="p-1 rounded-lg text-rose-600 hover:bg-rose-100 hover:text-rose-800 transition">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <!-- Unit Count Adjuster & Wattage Readout -->
+            <div class="flex items-center justify-between gap-2 bg-white/80 rounded-lg px-2 py-1.5 border border-slate-200/80">
+              <div class="flex items-center gap-1.5">
+                <span class="text-[10px] font-semibold text-slate-500">Units:</span>
+                <button type="button" onclick="changeApplianceUnits(${index}, -1)"
+                  class="w-5 h-5 rounded bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold text-xs flex items-center justify-center">-</button>
+                <span class="font-mono-code text-xs font-extrabold text-slate-900 min-w-[16px] text-center">${app.units}</span>
+                <button type="button" onclick="changeApplianceUnits(${index}, 1)"
+                  class="w-5 h-5 rounded bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold text-xs flex items-center justify-center">+</button>
+              </div>
+              <div class="font-mono-code text-xs text-right">
+                <span class="text-slate-500 text-[10px]">${app.units}×${app.watts}W =</span>
+                <span class="font-extrabold text-slate-900">${totalWatts}W</span>
+              </div>
+            </div>
+
+            <div class="flex items-center justify-between text-[11px] font-mono-code text-slate-600">
+              <span>${app.dailyHours}h/day</span>
+              <span class="font-semibold text-slate-800">${dailyKwh} kWh/d</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function addAppliance(event) {
+      event.preventDefault();
+      const nameInput = document.getElementById('new-app-name');
+      const unitsInput = document.getElementById('new-app-units');
+      const wattsInput = document.getElementById('new-app-watts');
+      const hoursInput = document.getElementById('new-app-hours');
+
+      const name = nameInput.value.trim();
+      const units = Math.max(1, parseInt(unitsInput.value, 10) || 1);
+      const watts = Math.max(1, parseFloat(wattsInput.value) || 0);
+      const dailyHours = Math.max(0.1, Math.min(24, parseFloat(hoursInput.value) || 1));
+
+      if (!name || watts <= 0) return;
+
+      appliances.push({
+        id: 'custom_' + Date.now(),
+        name,
+        units,
+        watts,
+        dailyHours,
+        active: true,
+        note: `USER ADDED: ${units} unit(s) × ${watts}W`
+      });
+
+      nameInput.value = '';
+      unitsInput.value = '1';
+      wattsInput.value = '';
+      hoursInput.value = '4.0';
+
+      renderAppliances();
+      recalculateAll();
+      showToast(`Added "${name}" (${units} × ${watts}W = ${units * watts}W).`);
+    }
+
+    function deleteAppliance(index) {
+      const removed = appliances.splice(index, 1)[0];
+      renderAppliances();
+      recalculateAll();
+      showToast(`Deleted "${removed.name}" from room appliances.`);
+    }
+
+    function changeApplianceUnits(index, delta) {
+      const nextVal = appliances[index].units + delta;
+      if (nextVal < 1) return;
+      appliances[index].units = nextVal;
+      renderAppliances();
+      recalculateAll();
+    }
+
+    function toggleAppliance(index) {
+      appliances[index].active = !appliances[index].active;
+      renderAppliances();
+      recalculateAll();
+    }
+
+    // =========================================================================
+    // 5. RENDERING TARIFF TABLE & ROOMMATE CARDS (Editable Name, Unit, Count)
+    // =========================================================================
+
+    function renderTariffTable(breakdownRows) {
+      const tbody = document.getElementById('tariff-table-body');
+      if (tbody.children.length === tariffBlocks.length) {
+        tariffBlocks.forEach((block, idx) => {
+          const row = breakdownRows[idx] || { units: 0, cost: 0, isCurrentTop: false };
+          const tr = tbody.children[idx];
+          tr.className = row.isCurrentTop ? 'bg-amber-50/80 font-bold' : '';
+          tr.children[0].innerHTML = block.label +
+            (row.isCurrentTop ? ' <span class="ml-1 text-[9px] uppercase px-1.5 py-0.5 rounded bg-amber-200 text-amber-950 font-bold">Active Tier</span>' : '');
+          const input = tr.children[1].querySelector('input');
+          if (document.activeElement !== input) input.value = block.rate.toFixed(2);
+          tr.children[2].textContent = row.units.toFixed(1);
+          tr.children[3].textContent = row.cost.toFixed(2);
+        });
+        return;
+      }
+      tbody.innerHTML = tariffBlocks.map((block, idx) => {
+        const row = breakdownRows[idx] || { units: 0, cost: 0, isCurrentTop: false };
+        const highlight = row.isCurrentTop ? 'bg-amber-50/80 font-bold' : '';
+        return `
+          <tr class="${highlight}">
+            <td class="py-2.5 pr-2 font-sans text-slate-800">
+              ${block.label}
+              ${row.isCurrentTop ? '<span class="ml-1 text-[9px] uppercase px-1.5 py-0.5 rounded bg-amber-200 text-amber-950 font-bold">Active Tier</span>' : ''}
+            </td>
+            <td class="py-2.5 px-2 text-right">
+              <input type="number" step="0.5" min="0" value="${block.rate.toFixed(2)}"
+                onchange="updateTariffRate(${idx}, this.value)"
+                class="w-16 text-right rounded border border-slate-300 px-1.5 py-1 text-xs bg-white focus:ring-1 focus:ring-emerald-500"
+                title="Editable CEB Block Rate (LKR/kWh)" />
+            </td>
+            <td class="py-2.5 px-2 text-right text-slate-700">${row.units.toFixed(1)}</td>
+            <td class="py-2.5 pl-2 text-right font-semibold text-slate-900">${row.cost.toFixed(2)}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    let roommatesNeedRebuild = true;
+
+    function renderRoommates(effectiveUnitRate, sharedBaseBill, personalScale = 1) {
+      const container = document.getElementById('roommate-cards');
+      const count = roommates.length;
+
+      document.getElementById('nav-roommate-count').textContent = count;
+      document.getElementById('mob-roommate-count').textContent = count;
+      document.getElementById('roommate-formula-box').innerHTML =
+        `Formula: <strong>Share<sub>i</sub> = (Shared Base Bill ÷ ${count || 1}) + (Personal kWh<sub>i</sub> × Effective Rate)</strong>`;
+      document.getElementById('roommate-assumption-note').innerHTML =
+        `<span class="font-bold text-amber-800">ASSUMPTION:</span> Shared base load is divided equally among ${count} roommate${count === 1 ? '' : 's'}; Personal kWh = (Count of Units × Unit Wattage ÷ 1000) × Monthly Hours.`;
+
+      if (count === 0) {
+        container.innerHTML = `
+          <div class="col-span-full p-8 text-center rounded-xl border-2 border-dashed border-slate-300 text-slate-500 text-xs">
+            No roommates added yet. Use the form above to add a roommate to split the bill.
+          </div>
+        `;
+        roommatesNeedRebuild = true;
+        document.getElementById('roommate-sum-check').textContent = 'LKR 0.00';
+        return;
+      }
+
+      const equalSharedCost = sharedBaseBill / count;
+      let sumCheck = 0;
+      const calc = roommates.map(rm => {
+        const unitWatts = resolveUnitWattage(rm.unitName);
+        const personalKwh = (rm.unitCount * (unitWatts / 1000)) * rm.monthlyHours * personalScale;
+        const personalCost = personalKwh * effectiveUnitRate;
+        const totalShare = equalSharedCost + personalCost;
+        sumCheck += totalShare;
+        return { unitWatts, personalKwh, personalCost, totalShare };
+      });
+
+      // Fast path: update numbers only so inputs never lose focus while typing/tabbing
+      if (!roommatesNeedRebuild && container.children.length === count) {
+        roommates.forEach((rm, idx) => {
+          const card = container.children[idx];
+          const c = calc[idx];
+          card.querySelector('.rm-watts').textContent = `${c.unitWatts}W / unit`;
+          card.querySelector('.rm-del').title = `Delete ${rm.name}`;
+          card.querySelector('.rm-base').textContent = `LKR ${equalSharedCost.toFixed(0)}`;
+          card.querySelector('.rm-personal-label').textContent = `Personal (${c.personalKwh.toFixed(1)} kWh):`;
+          card.querySelector('.rm-personal').textContent = `LKR ${c.personalCost.toFixed(0)}`;
+          card.querySelector('.rm-total').textContent = `LKR ${c.totalShare.toFixed(0)}`;
+        });
+        document.getElementById('roommate-sum-check').textContent = `LKR ${sumCheck.toFixed(2)}`;
+        return;
+      }
+
+      container.innerHTML = roommates.map((rm, idx) => {
+        const c = calc[idx];
+        return `
+          <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 flex flex-col justify-between space-y-3">
+            <div class="space-y-2.5">
+              <div class="flex items-center justify-between gap-2">
+                <div class="flex-1 min-w-0">
+                  <label class="block text-[10px] font-bold uppercase text-slate-500 mb-0.5">Roommate Name</label>
+                  <input type="text" value="${escapeHtml(rm.name)}"
+                    onchange="updateRoommate(${idx}, 'name', this.value, this)"
+                    class="w-full rounded-lg border border-slate-300 px-2.5 py-1.5 text-xs font-extrabold text-slate-900 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+                </div>
+                <button type="button" onclick="deleteRoommate(${idx})"
+                  title="Delete ${escapeHtml(rm.name)}"
+                  class="rm-del mt-4 p-1.5 rounded-lg text-rose-600 hover:bg-rose-100 hover:text-rose-800 transition shrink-0">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                </button>
+              </div>
+
+              <div>
+                <div class="flex items-center justify-between mb-0.5">
+                  <label class="block text-[10px] font-bold uppercase text-slate-500">Unit Name</label>
+                  <span class="rm-watts text-[10px] font-mono-code font-semibold text-emerald-700">${c.unitWatts}W / unit</span>
+                </div>
+                <input list="roommate-unit-options" type="text" value="${escapeHtml(rm.unitName)}"
+                  onchange="updateRoommate(${idx}, 'unitName', this.value, this)"
+                  class="w-full rounded-lg border border-slate-300 px-2.5 py-1.5 text-xs font-semibold text-slate-800 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+              </div>
+
+              <div class="grid grid-cols-2 gap-2 text-xs">
+                <div>
+                  <label class="block text-[10px] font-semibold text-slate-600 mb-0.5">Count of Units</label>
+                  <input type="number" min="1" max="50" step="1" value="${rm.unitCount}"
+                    onchange="updateRoommate(${idx}, 'unitCount', this.value, this)"
+                    class="w-full rounded-lg border border-slate-300 px-2.5 py-1.5 font-mono-code text-xs bg-white" />
+                </div>
+                <div>
+                  <label class="block text-[10px] font-semibold text-slate-600 mb-0.5">Hrs / Month</label>
+                  <input type="number" min="0" max="720" step="0.5" value="${rm.monthlyHours}"
+                    onchange="updateRoommate(${idx}, 'monthlyHours', this.value, this)"
+                    class="w-full rounded-lg border border-slate-300 px-2.5 py-1.5 font-mono-code text-xs bg-white" />
+                </div>
+              </div>
+            </div>
+
+            <div class="pt-2.5 border-t border-slate-200 space-y-1 text-[11px] font-mono-code">
+              <div class="flex justify-between text-slate-600">
+                <span>Base Share (1/${count}):</span>
+                <span class="rm-base">LKR ${equalSharedCost.toFixed(0)}</span>
+              </div>
+              <div class="flex justify-between text-slate-600">
+                <span class="rm-personal-label">Personal (${c.personalKwh.toFixed(1)} kWh):</span>
+                <span class="rm-personal">LKR ${c.personalCost.toFixed(0)}</span>
+              </div>
+              <div class="flex justify-between text-sm font-extrabold text-emerald-800 pt-1 border-t border-slate-200/80">
+                <span>FAIR TOTAL:</span>
+                <span class="rm-total">LKR ${c.totalShare.toFixed(0)}</span>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+      roommatesNeedRebuild = false;
+
+      document.getElementById('roommate-sum-check').textContent = `LKR ${sumCheck.toFixed(2)}`;
+    }
+
+    function addRoommate(event) {
+      event.preventDefault();
+      const nameInput = document.getElementById('new-roommate-name');
+      const unitInput = document.getElementById('new-roommate-unit');
+      const countInput = document.getElementById('new-roommate-count');
+      const hoursInput = document.getElementById('new-roommate-hours');
+
+      const name = nameInput.value.trim();
+      const unitName = unitInput.value.trim();
+      if (!name || !unitName) return;
+
+      const unitCount = Math.max(1, parseInt(countInput.value, 10) || 1);
+      const monthlyHours = Math.max(0, parseFloat(hoursInput.value) || 0);
+
+      roommates.push({ name, unitName, unitCount, monthlyHours });
+      roommatesNeedRebuild = true;
+
+      nameInput.value = '';
+      unitInput.value = '';
+      countInput.value = '1';
+      hoursInput.value = '5';
+
+      recalculateAll();
+      showToast(`Added roommate "${name}" (${unitCount} × ${unitName}).`);
+    }
+
+    function deleteRoommate(index) {
+      if (roommates.length <= 1) {
+        showToast('At least 1 roommate must remain to split the electricity bill.');
+        return;
+      }
+      const removed = roommates.splice(index, 1)[0];
+      roommatesNeedRebuild = true;
+      recalculateAll();
+      showToast(`Removed roommate "${removed.name}".`);
+    }
+
+    function updateRoommate(idx, field, val, el) {
+      if (field === 'name' || field === 'unitName') {
+        const trimmed = String(val).trim();
+        if (trimmed) roommates[idx][field] = trimmed;
+      } else if (field === 'unitCount') {
+        const parsed = parseInt(val, 10);
+        roommates[idx].unitCount = isNaN(parsed) || parsed < 1 ? 1 : parsed;
+      } else if (field === 'monthlyHours') {
+        const parsed = parseFloat(val);
+        roommates[idx].monthlyHours = isNaN(parsed) || parsed < 0 ? 0 : parsed;
+      }
+      if (el) el.value = roommates[idx][field]; // show the sanitized value
+      recalculateAll();
+    }
+
+    // =========================================================================
+    // 6. CORE CALCULATION ENGINE
+    // =========================================================================
+
+    function calculateCebBill(totalKwh, customFixed = null) {
+      let remaining = Math.max(0, totalKwh);
+      let energySubtotal = 0;
+      let highestBlockIndex = 0;
+
+      const breakdownRows = tariffBlocks.map((block, idx) => {
+        const span = block.max === Infinity ? Infinity : (block.max - block.min);
+        const unitsInBlock = Math.min(remaining, span);
+        const costInBlock = unitsInBlock * block.rate;
+
+        if (unitsInBlock > 0) {
+          highestBlockIndex = idx;
+        }
+        energySubtotal += costInBlock;
+        remaining -= unitsInBlock;
+
+        return {
+          units: unitsInBlock,
+          cost: costInBlock,
+          isCurrentTop: false
+        };
+      });
+
+      breakdownRows[highestBlockIndex].isCurrentTop = true;
+      const applicableFixed = customFixed !== null
+        ? customFixed
+        : tariffBlocks[highestBlockIndex].fixed;
+
+      return {
+        energySubtotal,
+        fixedCharge: applicableFixed,
+        grandTotal: energySubtotal + applicableFixed,
+        highestBlockIndex,
+        breakdownRows
+      };
+    }
+
+    function onCustomFixedInput() {
+      const val = parseFloat(document.getElementById('custom-fixed-charge').value);
+      manualFixedOverride = isNaN(val) || val < 0 ? 0 : val;
+      recalculateAll();
+    }
+
+    function recalculateAll() {
+      let liveWatts = 0;
+      let loggedKwh = 0;
+      let projected30DayKwh = 0;
+      let daysElapsedVal = 20;
+      let dailyForecastKwh = 0;
+      let standbyWatts = Math.max(0, parseFloat(document.getElementById('standby-watts-input').value) || 0);
+
+      if (currentMode === 'manual') {
+        const prevKwh = parseFloat(document.getElementById('manual-prev-kwh').value) || 0;
+        const currKwh = parseFloat(document.getElementById('manual-curr-kwh').value) || 0;
+        const daysElapsed = Math.min(30, Math.max(1, parseFloat(document.getElementById('manual-days').value) || 1));
+        liveWatts = Math.max(0, parseFloat(document.getElementById('manual-watts').value) || 0);
+
+        loggedKwh = Math.max(0, currKwh - prevKwh);
+        const dailyAvgKwh = loggedKwh / daysElapsed;
+        daysElapsedVal = daysElapsed;
+        dailyForecastKwh = dailyAvgKwh;
+        projected30DayKwh = dailyAvgKwh * 30;
+
+        document.getElementById('kpi-power-source').textContent = 'Source: Physical Meter';
+        document.getElementById('kpi-kwh-source').textContent = 'Real Meter Projection';
+        document.getElementById('kpi-logged-kwh').textContent = `${loggedKwh.toFixed(1)} kWh (Day ${daysElapsed}/30)`;
+      } else {
+        let activeApplianceWatts = 0;
+        let activeDailyKwh = 0;
+
+        appliances.forEach(app => {
+          if (app.active) {
+            const appTotalWatts = app.units * app.watts;
+            activeApplianceWatts += appTotalWatts;
+            activeDailyKwh += (appTotalWatts / 1000) * app.dailyHours;
+          }
+        });
+
+        liveWatts = (currentMode === 'serial' && serialWatts !== null)
+          ? serialWatts
+          : (activeApplianceWatts + standbyWatts);
+
+        loggedKwh = parseFloat(document.getElementById('logged-kwh-slider').value) || 58;
+        const standbyDailyKwh = (standbyWatts / 1000) * 24;
+        daysElapsedVal = 20;
+        dailyForecastKwh = activeDailyKwh + standbyDailyKwh;
+        projected30DayKwh = loggedKwh + ((activeDailyKwh + standbyDailyKwh) * 10);
+
+        document.getElementById('kpi-power-source').textContent = currentMode === 'serial'
+          ? 'Source: ESP32 USB Serial'
+          : 'Sample: Appliance Sum';
+        document.getElementById('kpi-kwh-source').textContent = 'Sample Meter + 10d Forecast';
+        document.getElementById('kpi-logged-kwh').textContent = `${loggedKwh.toFixed(1)} kWh (Day 20/30)`;
+      }
+
+      const liveAmps = liveWatts / GRID_VOLTAGE_V;
+
+      const prelimBill = calculateCebBill(projected30DayKwh);
+      const fixedInput = document.getElementById('custom-fixed-charge');
+      if (manualFixedOverride === null) {
+        fixedInput.value = tariffBlocks[prelimBill.highestBlockIndex].fixed;
+      }
+      const finalBill = calculateCebBill(projected30DayKwh, parseFloat(fixedInput.value) || 0);
+
+      const avgUnitRate = projected30DayKwh > 0 ? (finalBill.grandTotal / projected30DayKwh) : 0;
+
+      // Update Home KPI Cards
+      document.getElementById('kpi-watts').textContent = Math.round(liveWatts).toLocaleString();
+      document.getElementById('kpi-amps').textContent = liveAmps.toFixed(2);
+      document.getElementById('kpi-kwh').textContent = projected30DayKwh.toFixed(1);
+      document.getElementById('kpi-bill').textContent = Math.round(finalBill.grandTotal).toLocaleString();
+      document.getElementById('kpi-avg-rate').textContent = avgUnitRate.toFixed(2);
+
+      // Update Simulator Mini Telemetry Strip
+      document.getElementById('sim-strip-watts').textContent = Math.round(liveWatts).toLocaleString();
+      document.getElementById('sim-strip-kwh').textContent = projected30DayKwh.toFixed(1);
+      document.getElementById('sim-strip-bill').textContent = Math.round(finalBill.grandTotal).toLocaleString();
+      document.getElementById('sim-strip-block').textContent = `Block ${finalBill.highestBlockIndex + 1}`;
+
+      // Update Tariff Table
+      renderTariffTable(finalBill.breakdownRows);
+      document.getElementById('tariff-energy-subtotal').textContent = finalBill.energySubtotal.toFixed(2);
+      document.getElementById('tariff-fixed-tier').textContent = `Block ${finalBill.highestBlockIndex + 1}`;
+      document.getElementById('tariff-fixed-display').textContent = finalBill.fixedCharge.toFixed(2);
+      document.getElementById('tariff-grand-total').textContent = `LKR ${finalBill.grandTotal.toFixed(2)}`;
+
+      // Update Tariff Slab Guard Card
+      updateSlabGuardCard(projected30DayKwh, finalBill.highestBlockIndex);
+
+      // Update Phantom / Standby Leakage Card & Alert Banner
+      updateLeakageAlerts(standbyWatts, tariffBlocks[finalBill.highestBlockIndex].rate);
+
+      // Update Roommate Fair Bill Splitter
+      let totalPersonalKwh = 0;
+      roommates.forEach(rm => {
+        const unitWatts = resolveUnitWattage(rm.unitName);
+        totalPersonalKwh += (rm.unitCount * (unitWatts / 1000)) * rm.monthlyHours;
+      });
+      const effectiveRate = avgUnitRate > 0 ? avgUnitRate : 30.0;
+      const totalPersonalCost = totalPersonalKwh * effectiveRate;
+      // If personal usage exceeds the whole bill, scale it down so shares still sum to the bill
+      const personalScale = totalPersonalCost > finalBill.grandTotal && totalPersonalCost > 0
+        ? finalBill.grandTotal / totalPersonalCost : 1;
+      const sharedBaseBill = Math.max(0, finalBill.grandTotal - totalPersonalCost * personalScale);
+      renderRoommates(effectiveRate, sharedBaseBill, personalScale);
+
+      lastCalc = {
+        liveWatts, loggedKwh, projected30DayKwh, standbyWatts, finalBill, avgUnitRate,
+        daysElapsed: daysElapsedVal, dailyForecastKwh, effectiveRate, sharedBaseBill, personalScale
+      };
+      renderReports();
+    }
+
+    function updateSlabGuardCard(kwh, blockIdx) {
+      const card = document.getElementById('kpi-slab-card');
+      const statusEl = document.getElementById('kpi-slab-status');
+      const detailEl = document.getElementById('kpi-slab-detail');
+      const badgeEl = card.firstElementChild.lastElementChild;
+
+      badgeEl.textContent = `BLOCK ${blockIdx + 1}`;
+
+      if (kwh <= 60) {
+        const diff = (60 - kwh).toFixed(1);
+        card.className = 'bg-emerald-50 rounded-2xl p-4 shadow-sm border border-emerald-300 flex flex-col justify-between';
+        badgeEl.className = 'text-[10px] font-bold px-2 py-0.5 rounded-md bg-emerald-200 text-emerald-950';
+        statusEl.className = 'text-base sm:text-lg font-extrabold text-emerald-950 leading-tight';
+        statusEl.textContent = `Safe Zone (${diff} kWh under 60)`;
+        detailEl.className = 'text-xs text-emerald-900 mt-1';
+        detailEl.innerHTML = 'Staying ≤ 60 kWh keeps you in the lower subsidized domestic blocks.';
+      } else if (kwh <= 90) {
+        const diff = (90 - kwh).toFixed(1);
+        card.className = 'bg-amber-50 rounded-2xl p-4 shadow-sm border border-amber-300 flex flex-col justify-between';
+        badgeEl.className = 'text-[10px] font-bold px-2 py-0.5 rounded-md bg-amber-200 text-amber-950';
+        statusEl.className = 'text-base sm:text-lg font-extrabold text-amber-950 leading-tight';
+        statusEl.textContent = `${diff} kWh below 90-Unit Spike!`;
+        detailEl.className = 'text-xs text-amber-900 mt-1';
+        detailEl.innerHTML = `Crossing 90 kWh jumps rate to <strong>LKR ${tariffBlocks[3].rate.toFixed(0)}/kWh</strong> &amp; fixed fee to LKR ${tariffBlocks[3].fixed.toLocaleString()}.`;
+      } else {
+        const over = (kwh - 90).toFixed(1);
+        card.className = 'bg-rose-50 rounded-2xl p-4 shadow-sm border border-rose-300 flex flex-col justify-between';
+        badgeEl.className = 'text-[10px] font-bold px-2 py-0.5 rounded-md bg-rose-200 text-rose-950';
+        statusEl.className = 'text-base sm:text-lg font-extrabold text-rose-950 leading-tight';
+        statusEl.textContent = `SLAB SPIKE! (+${over} kWh over 90)`;
+        detailEl.className = 'text-xs text-rose-900 mt-1';
+        detailEl.innerHTML = `High-tariff penalty active (<strong>LKR ${tariffBlocks[blockIdx].rate.toFixed(0)}/kWh</strong>). Cut iron/kettle usage!`;
+      }
+    }
+
+    function updateLeakageAlerts(standbyWatts, marginalRate) {
+      const card = document.getElementById('kpi-leak-card');
+      const statusEl = document.getElementById('kpi-leak-status');
+      const detailEl = document.getElementById('kpi-leak-detail');
+      const banner = document.getElementById('leakage-alert-banner');
+
+      const monthlyIdleKwh = (standbyWatts / 1000) * 720;
+
+      if (standbyWatts > STANDBY_THRESHOLD_W) {
+        const excessWatts = standbyWatts - STANDBY_THRESHOLD_W;
+        const wastedKwh = (excessWatts / 1000) * 720;
+        const wastedLkr = wastedKwh * marginalRate;
+
+        card.className = 'bg-rose-50 rounded-2xl p-4 shadow-sm border border-rose-300 flex flex-col justify-between sm:col-span-2 lg:col-span-1';
+        statusEl.className = 'text-base sm:text-lg font-extrabold text-rose-900 leading-tight';
+        statusEl.textContent = `LEAKAGE DETECTED (${standbyWatts}W)`;
+        detailEl.className = 'text-xs text-rose-900 mt-1';
+        detailEl.innerHTML = `Exceeds 45W baseline by <strong>${excessWatts}W</strong> (~${wastedKwh.toFixed(1)} kWh/mo wasted).`;
+
+        banner.classList.remove('hidden');
+        document.getElementById('leakage-banner-text').innerHTML =
+          `Detected <strong>${standbyWatts}W</strong> of continuous standby/faulty-appliance draw (${excessWatts}W above the 45W normal baseline). Over 30 days (720 hours), this wastes <strong>${wastedKwh.toFixed(1)} kWh</strong>.`;
+        document.getElementById('leakage-banner-cost').textContent = `LKR ${Math.round(wastedLkr).toLocaleString()} / mo`;
+      } else {
+        card.className = 'bg-white rounded-2xl p-4 shadow-sm border border-slate-200 flex flex-col justify-between sm:col-span-2 lg:col-span-1';
+        statusEl.className = 'text-base sm:text-lg font-extrabold text-emerald-700 leading-tight';
+        statusEl.textContent = `Normal Baseline (${standbyWatts}W)`;
+        detailEl.className = 'text-xs text-slate-600 mt-1';
+        detailEl.innerHTML = `Continuous idle draw: <strong>${standbyWatts}W</strong> (${monthlyIdleKwh.toFixed(1)} kWh/mo).`;
+
+        banner.classList.add('hidden');
+      }
+    }
+
+    // =========================================================================
+    // 7. USER INTERACTION HANDLERS & HARDWARE WEB SERIAL BRIDGE
+    // =========================================================================
+
+    function onSliderChange(val) {
+      document.getElementById('logged-kwh-display').textContent = `${parseFloat(val).toFixed(1)} kWh`;
+      recalculateAll();
+    }
+
+    function setQuickScenario(type) {
+      if (type === 'normal') {
+        appliances.forEach(a => { a.active = ['fridge', 'fan', 'lights'].includes(a.id); });
+        document.getElementById('logged-kwh-slider').value = 58;
+        document.getElementById('standby-watts-input').value = 15;
+      } else if (type === 'spike') {
+        appliances.forEach(a => { a.active = ['fridge', 'fan', 'lights', 'iron', 'kettle'].includes(a.id); });
+        document.getElementById('logged-kwh-slider').value = 78;
+        document.getElementById('standby-watts-input').value = 20;
+      } else if (type === 'leak') {
+        appliances.forEach(a => { a.active = ['fridge'].includes(a.id); });
+        document.getElementById('logged-kwh-slider').value = 64;
+        document.getElementById('standby-watts-input').value = 95;
+      }
+      document.getElementById('logged-kwh-display').textContent = `${document.getElementById('logged-kwh-slider').value}.0 kWh`;
+      renderAppliances();
+      recalculateAll();
+    }
+
+    function updateTariffRate(idx, newVal) {
+      const parsed = parseFloat(newVal);
+      if (!isNaN(parsed) && parsed >= 0) {
+        tariffBlocks[idx].rate = parsed;
+        recalculateAll();
+      }
+    }
+
+    function resetDefaultTariffs() {
+      tariffBlocks = cloneTariffs();
+      manualFixedOverride = null;
+      recalculateAll();
+      showToast('CEB Domestic Tariff rates reset to default schedule.');
+    }
+
+    function setDataMode(mode) {
+      currentMode = mode;
+      const btnSim = document.getElementById('btn-mode-sim');
+      const btnManual = document.getElementById('btn-mode-manual');
+      const btnSerial = document.getElementById('btn-mode-serial');
+      const manualPanel = document.getElementById('manual-meter-panel');
+      const modeBadge = document.getElementById('mode-badge');
+
+      const inactiveBtnClass = 'px-2.5 sm:px-3 py-1.5 rounded-lg text-[11px] sm:text-xs font-semibold transition text-slate-300 hover:text-white text-center';
+      const activeBtnClass = 'px-2.5 sm:px-3 py-1.5 rounded-lg text-[11px] sm:text-xs font-semibold transition bg-emerald-500 text-slate-950 shadow text-center';
+
+      btnSim.className = inactiveBtnClass;
+      btnManual.className = inactiveBtnClass;
+      btnSerial.className = 'px-2.5 sm:px-3 py-1.5 rounded-lg text-[11px] sm:text-xs font-semibold transition text-slate-300 hover:text-white flex items-center justify-center gap-1';
+
+      if (mode === 'sim') {
+        btnSim.className = activeBtnClass;
+        manualPanel.classList.add('hidden');
+        modeBadge.className = 'inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full font-semibold bg-amber-500/20 text-amber-300 border border-amber-500/40 text-[10px] sm:text-xs';
+        modeBadge.innerHTML = '<span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span> SAMPLE / SIMULATED SENSOR STREAM';
+      } else if (mode === 'manual') {
+        btnManual.className = activeBtnClass;
+        manualPanel.classList.remove('hidden');
+        modeBadge.className = 'inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-[10px] sm:text-xs';
+        modeBadge.innerHTML = '<span class="w-2 h-2 rounded-full bg-emerald-400"></span> VERIFIED MANUAL METER ENTRY';
+        switchPage('home');
+      } else if (mode === 'serial') {
+        btnSerial.className = 'px-2.5 sm:px-3 py-1.5 rounded-lg text-[11px] sm:text-xs font-semibold transition bg-emerald-500 text-slate-950 shadow flex items-center justify-center gap-1';
+        manualPanel.classList.add('hidden');
+        modeBadge.className = 'inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-[10px] sm:text-xs';
+        modeBadge.innerHTML = '<span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span> LIVE ESP32 HARDWARE STREAM';
+      }
+      recalculateAll();
+    }
+
+
+    // =========================================================================
+    // 8. DARK MODE TOGGLE
+    // =========================================================================
+
+    function syncThemeButton() {
+      const dark = document.documentElement.classList.contains('dark');
+      document.getElementById('icon-moon').classList.toggle('hidden', dark);
+      document.getElementById('icon-sun').classList.toggle('hidden', !dark);
+      document.getElementById('theme-label').textContent = dark ? 'Light' : 'Dark';
+      const btn = document.getElementById('theme-toggle');
+      btn.setAttribute('aria-pressed', dark ? 'true' : 'false');
+      btn.title = dark ? 'Switch to light mode' : 'Switch to dark mode';
+    }
+
+    function toggleTheme() {
+      const dark = document.documentElement.classList.toggle('dark');
+      try { localStorage.setItem('watts-theme', dark ? 'dark' : 'light'); } catch (e) {}
+      syncThemeButton();
+    }
+
+    // =========================================================================
+    // 9. REPORTS PAGE (Daily & Monthly) — charts are plain SVG/CSS, no libraries
+    //    Every number comes from the same calculation engine as the Home page.
+    // =========================================================================
+
+    const CHART_COLORS = ['#10b981', '#3b82f6', '#f59e0b', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316', '#64748b'];
+    const fmtN = (n, d = 1) => Number(n).toLocaleString('en-US', { minimumFractionDigits: d, maximumFractionDigits: d });
+    const fmtLkr = n => 'LKR ' + Math.round(n).toLocaleString('en-US');
+    let reportTab = 'daily';
+
+    function setReportTab(tab) {
+      reportTab = tab;
+      document.getElementById('report-daily').classList.toggle('hidden', tab !== 'daily');
+      document.getElementById('report-monthly').classList.toggle('hidden', tab !== 'monthly');
+      const on = 'px-4 py-1.5 rounded-lg text-xs font-bold transition bg-emerald-500 text-slate-950 shadow';
+      const off = 'rep-tab-off px-4 py-1.5 rounded-lg text-xs font-bold transition text-slate-600';
+      document.getElementById('rep-tab-daily').className = tab === 'daily' ? on : off;
+      document.getElementById('rep-tab-monthly').className = tab === 'monthly' ? on : off;
+    }
+
+    function repSection(title, sub, inner, extra = '') {
+      return `
+        <section class="bg-white rounded-2xl p-4 sm:p-5 shadow-sm border border-slate-200 ${extra}">
+          <div class="pb-3 mb-4 border-b border-slate-100">
+            <h3 class="text-sm sm:text-base font-extrabold text-slate-900">${title}</h3>
+            ${sub ? `<p class="text-xs text-slate-600 mt-0.5">${sub}</p>` : ''}
+          </div>
+          ${inner}
+        </section>`;
+    }
+
+    function repKpi(label, value, unit, note, opts = {}) {
+      const size = opts.size || 'text-2xl sm:text-3xl';
+      const color = opts.color || 'text-slate-900';
+      return `
+        <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200 flex flex-col justify-between">
+          <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500">${label}</span>
+          <div class="my-2 flex items-baseline gap-1.5 min-w-0">
+            <span class="${size} font-extrabold font-mono-code ${color} truncate">${value}</span>
+            <span class="text-sm font-bold text-slate-500 shrink-0">${unit}</span>
+          </div>
+          <p class="pt-2 border-t border-slate-100 text-[11px] text-slate-500">${note}</p>
+        </div>`;
+    }
+
+    function repLegend(items) {
+      return '<div class="flex flex-wrap gap-x-4 gap-y-1.5 mt-3 text-[11px] text-slate-600">' +
+        items.map(([color, label, dashed]) =>
+          `<span class="inline-flex items-center gap-1.5"><span class="inline-block ${dashed ? 'w-4 h-0 border-t-2 border-dashed' : 'w-3 h-3 rounded-sm'}" style="${dashed ? 'border-color:' + color : 'background:' + color}"></span>${label}</span>`
+        ).join('') + '</div>';
+    }
+
+    // Horizontal bar rows. Each row: { label (html-safe), display, segs: [{ value, color }] }
+    function repBars(rows) {
+      const max = Math.max(1e-9, ...rows.map(r => r.segs.reduce((s, g) => s + g.value, 0)));
+      return '<div class="space-y-3.5">' + rows.map(r => {
+        const segs = r.segs.map(g => `<div class="h-full" style="width:${(g.value / max * 100).toFixed(2)}%;background:${g.color}"></div>`).join('');
+        return `
+          <div>
+            <div class="flex items-baseline justify-between gap-3 text-xs">
+              <span class="font-semibold text-slate-800 truncate">${r.label}</span>
+              <span class="font-mono-code text-slate-700 shrink-0 text-[11px]">${r.display}</span>
+            </div>
+            <div class="mt-1 h-3.5 rounded-full overflow-hidden flex" style="background:var(--chart-track)">${segs}</div>
+          </div>`;
+      }).join('') + '</div>';
+    }
+
+    function niceCeil(maxV, ticks) {
+      const raw = Math.max(maxV, 1e-6) / ticks;
+      const pow = Math.pow(10, Math.floor(Math.log10(raw)));
+      const n = raw / pow;
+      const step = (n <= 1 ? 1 : n <= 2 ? 2 : n <= 5 ? 5 : 10) * pow;
+      return { step, max: step * Math.ceil(Math.max(maxV, 1e-6) / step - 1e-9) };
+    }
+
+    function svgWrap(svg) {
+      return `<div class="overflow-x-auto"><div class="min-w-[560px]">${svg}</div></div>`;
+    }
+
+    function yAxis(max, step, L, R, T, ph, W) {
+      let g = '';
+      const n = Math.round(max / step);
+      const dec = step < 1 ? 2 : (step < 10 ? 1 : 0);
+      for (let i = 0; i <= n; i++) {
+        const v = i * step;
+        const y = T + ph - (v / max) * ph;
+        g += `<line x1="${L}" x2="${W - R}" y1="${y}" y2="${y}" style="stroke:var(--chart-grid)" stroke-width="1"/>` +
+             `<text x="${L - 6}" y="${y + 3}" text-anchor="end" font-size="10" style="fill:var(--chart-text)">${fmtN(v, dec)}</text>`;
+      }
+      return g;
+    }
+
+    function xAxisDays(L, pw, H, atCenter, perDay) {
+      return [1, 5, 10, 15, 20, 25, 30].map(d => {
+        const x = atCenter ? L + (d - 0.5) * perDay : L + (d / 30) * pw;
+        return `<text x="${x}" y="${H - 8}" text-anchor="middle" font-size="10" style="fill:var(--chart-text)">${d}</text>`;
+      }).join('');
+    }
+
+    // Daily kWh per day of the billing cycle (logged days vs forecast days) + daily budget line
+    function dailyColumnChart(elapsed, perLogged, perForecast, budget) {
+      const W = 720, H = 240, L = 44, R = 10, T = 14, B = 28;
+      const pw = W - L - R, ph = H - T - B;
+      const { step, max } = niceCeil(Math.max(perLogged, perForecast, budget || 0) * 1.15, 4);
+      const bw = pw / 30;
+      let g = yAxis(max, step, L, R, T, ph, W);
+      for (let d = 1; d <= 30; d++) {
+        const logged = d <= elapsed;
+        const v = logged ? perLogged : perForecast;
+        const h = (v / max) * ph;
+        g += `<rect x="${L + (d - 1) * bw + 1.5}" y="${T + ph - h}" width="${Math.max(1, bw - 3)}" height="${h}" rx="2" fill="${logged ? '#3b82f6' : '#10b981'}"><title>Day ${d} (${logged ? 'logged avg' : 'forecast'}): ${fmtN(v, 2)} kWh</title></rect>`;
+      }
+      g += xAxisDays(L, pw, H, true, bw);
+      if (budget !== null && budget !== undefined) {
+        const y = T + ph - (Math.min(budget, max) / max) * ph;
+        g += `<line x1="${L}" x2="${W - R}" y1="${y}" y2="${y}" stroke="#f43f5e" stroke-width="1.8" stroke-dasharray="6 4"/>` +
+             `<text x="${W - R - 2}" y="${y - 5}" text-anchor="end" font-size="10" font-weight="700" fill="#f43f5e">Budget ${fmtN(budget, 2)} kWh/day</text>`;
+      }
+      g += `<text x="${L + pw / 2}" y="${H - 0}" text-anchor="middle" font-size="9" style="fill:var(--chart-text)">Day of 30-day billing cycle</text>`;
+      return svgWrap(`<svg viewBox="0 0 ${W} ${H + 4}" class="w-full h-auto" role="img" aria-label="Daily energy use across the 30-day billing cycle">${g}</svg>`);
+    }
+
+    // Cumulative kWh across the cycle with tariff-block threshold lines
+    function cumulativeChart(elapsed, logged, projected, blocks) {
+      const W = 720, H = 260, L = 44, R = 50, T = 14, B = 28;
+      const pw = W - L - R, ph = H - T - B;
+      const { step, max } = niceCeil(Math.max(projected, logged, 100) * 1.08, 5);
+      const x = d => L + (d / 30) * pw;
+      const y = v => T + ph - (Math.min(v, max) / max) * ph;
+      let g = yAxis(max, step, L, R, T, ph, W);
+      blocks.slice(0, 4).map(b => b.max).filter(t => Number.isFinite(t) && t < max).forEach(t => {
+        const hot = t === 90;
+        g += `<line x1="${L}" x2="${W - R}" y1="${y(t)}" y2="${y(t)}" stroke="${hot ? '#f43f5e' : '#f59e0b'}" stroke-width="1.4" stroke-dasharray="5 4" opacity="${hot ? 1 : .7}"/>` +
+             `<text x="${W - R + 4}" y="${y(t) + 3}" font-size="10" font-weight="700" fill="${hot ? '#f43f5e' : '#d97706'}">${t} kWh</text>`;
+      });
+      g += xAxisDays(L, pw, H, false, 0);
+      g += `<path d="M ${x(0)} ${y(0)} L ${x(elapsed)} ${y(logged)} L ${x(elapsed)} ${y(0)} Z" fill="#3b82f6" opacity=".15"/>`;
+      g += `<line x1="${x(0)}" y1="${y(0)}" x2="${x(elapsed)}" y2="${y(logged)}" stroke="#3b82f6" stroke-width="2.8" stroke-linecap="round"/>`;
+      g += `<line x1="${x(elapsed)}" y1="${y(logged)}" x2="${x(30)}" y2="${y(projected)}" stroke="#10b981" stroke-width="2.8" stroke-dasharray="7 5" stroke-linecap="round"/>`;
+      g += `<circle cx="${x(elapsed)}" cy="${y(logged)}" r="4.5" fill="#3b82f6"/><circle cx="${x(30)}" cy="${y(projected)}" r="4.5" fill="#10b981"/>`;
+      g += `<text x="${x(elapsed) - 8}" y="${y(logged) - 9}" text-anchor="end" font-size="10.5" font-weight="700" fill="#3b82f6">${fmtN(logged)} kWh (day ${elapsed})</text>`;
+      g += `<text x="${x(30) - 8}" y="${y(projected) - 9}" text-anchor="end" font-size="10.5" font-weight="700" fill="#10b981">${fmtN(projected)} kWh</text>`;
+      g += `<text x="${L + pw / 2}" y="${H}" text-anchor="middle" font-size="9" style="fill:var(--chart-text)">Day of 30-day billing cycle</text>`;
+      return svgWrap(`<svg viewBox="0 0 ${W} ${H + 4}" class="w-full h-auto" role="img" aria-label="Cumulative kWh across the billing cycle against tariff block thresholds">${g}</svg>`);
+    }
+
+    function donut(parts, centerTop, centerBottom) {
+      const total = parts.reduce((s, p) => s + p.value, 0) || 1;
+      let acc = 0;
+      const stops = parts.map(p => {
+        const from = acc / total * 100; acc += p.value; const to = acc / total * 100;
+        return `${p.color} ${from.toFixed(2)}% ${to.toFixed(2)}%`;
+      }).join(', ');
+      return `
+        <div class="relative w-36 h-36 rounded-full shrink-0" style="background:conic-gradient(${stops})" role="img" aria-label="Bill composition">
+          <div class="absolute inset-[18px] rounded-full flex flex-col items-center justify-center text-center" style="background:var(--chart-card)">
+            <span class="text-[10px] font-bold uppercase text-slate-500">${centerTop}</span>
+            <span class="text-sm font-extrabold font-mono-code text-slate-900">${centerBottom}</span>
+          </div>
+        </div>`;
+    }
+
+    function renderReports() {
+      if (!lastCalc) return;
+      const daily = document.getElementById('report-daily');
+      const monthly = document.getElementById('report-monthly');
+      if (!daily || !monthly) return;
+
+      const c = lastCalc;
+      const bill = c.finalBill;
+      const tier = bill.highestBlockIndex;
+      const marginal = tariffBlocks[tier].rate;
+      const slabLimit = tariffBlocks[2].max; // 90 kWh spike point used by the Slab Guard
+      const elapsed = c.daysElapsed;
+      const remainingDays = 30 - elapsed;
+
+      // ======================= DAILY REPORT =======================
+      const rows = [];
+      appliances.forEach(a => {
+        if (a.active) rows.push({ label: a.name + (a.units > 1 ? ` ×${a.units}` : ''), kwh: (a.units * a.watts / 1000) * a.dailyHours });
+      });
+      const standbyKwh = (c.standbyWatts / 1000) * 24;
+      if (standbyKwh > 0) rows.push({ label: 'Standby / Leakage Load', kwh: standbyKwh, standby: true });
+      rows.sort((a, b) => b.kwh - a.kwh);
+      const rowsTotal = rows.reduce((s, r) => s + r.kwh, 0);
+
+      const dailyKwh = c.dailyForecastKwh;
+      const dailyCost = dailyKwh * marginal;
+      const allowed = remainingDays > 0 ? Math.max(0, (slabLimit - c.loggedKwh) / remainingDays) : null;
+      const manual = currentMode === 'manual';
+
+      let budgetNote, budgetColor = 'text-slate-900';
+      if (allowed === null) {
+        budgetNote = 'Billing cycle complete (30/30 days).';
+      } else if (c.loggedKwh >= slabLimit) {
+        budgetNote = `Already past ${slabLimit} kWh — spike tier is active.`; budgetColor = 'text-rose-700';
+      } else if (dailyKwh <= allowed) {
+        budgetNote = `On track: forecast ${fmtN(dailyKwh, 2)} kWh/day is ${fmtN(allowed - dailyKwh, 2)} under budget.`; budgetColor = 'text-emerald-700';
+      } else {
+        budgetNote = `Over budget by ${fmtN(dailyKwh - allowed, 2)} kWh/day — will cross ${slabLimit} kWh.`; budgetColor = 'text-rose-700';
+      }
+
+      const top = rows[0];
+      const barRows = rows.map((r, i) => {
+        const color = r.standby ? (c.standbyWatts > STANDBY_THRESHOLD_W ? '#f43f5e' : '#64748b') : CHART_COLORS[i % CHART_COLORS.length];
+        const pct = rowsTotal > 0 ? (r.kwh / rowsTotal * 100) : 0;
+        return { label: escapeHtml(r.label), display: `${fmtN(r.kwh, 2)} kWh · ${fmtLkr(r.kwh * marginal)} · ${fmtN(pct, 0)}%`, segs: [{ value: r.kwh, color }] };
+      });
+
+      daily.innerHTML = `
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+          ${repKpi('Avg Daily Energy', fmtN(dailyKwh, 2), 'kWh/day', manual ? 'Meter average for the cycle so far' : 'Active appliances + standby load')}
+          ${repKpi('Est. Daily Cost', fmtLkr(dailyCost), '', `Energy charge at Block ${tier + 1} rate (LKR ${fmtN(marginal, 2)}/kWh)`, { color: 'text-emerald-700' })}
+          ${repKpi('Biggest Consumer', top ? escapeHtml(top.label) : '—', '', top ? `${fmtN(top.kwh, 2)} kWh/day (${fmtN(rowsTotal ? top.kwh / rowsTotal * 100 : 0, 0)}% of appliance load)` : 'No appliances switched on', { size: 'text-base sm:text-lg' })}
+          ${repKpi(`Daily Budget (≤ ${slabLimit} kWh)`, allowed === null ? '—' : fmtN(allowed, 2), allowed === null ? '' : 'kWh/day', budgetNote, { color: budgetColor })}
+        </div>
+
+        ${repSection('Energy by Appliance — Per Day',
+          manual ? 'Sample appliance estimate. Manual Meter mode uses your real meter average for the headline numbers above.' : 'Daily kWh and cost for every appliance that is switched ON (plus standby load).',
+          rows.length ? repBars(barRows) : '<p class="text-xs text-slate-500">No appliances are switched on. Turn some ON in the Live Simulator.</p>')}
+
+        ${repSection('Daily Usage Across the 30-Day Cycle',
+          `Meter only records a total, so days 1–${elapsed} show the average of what was logged; the remaining days show the forecast.`,
+          dailyColumnChart(elapsed, elapsed > 0 ? c.loggedKwh / elapsed : 0, dailyKwh, allowed) +
+          repLegend([['#3b82f6', `Logged (avg of days 1–${elapsed})`], ['#10b981', 'Forecast'], ['#f43f5e', `Daily budget to stay ≤ ${slabLimit} kWh`, true]]))}
+      `;
+
+      // ======================= MONTHLY REPORT =======================
+      const energyShare = bill.grandTotal > 0 ? bill.energySubtotal / bill.grandTotal * 100 : 0;
+
+      const blockRows = tariffBlocks.map((b, i) => ({ b, i, r: bill.breakdownRows[i] })).filter(o => o.r && o.r.units > 0).map(o => ({
+        label: escapeHtml(o.b.label) + (o.r.isCurrentTop ? ' <span class="ml-1 text-[9px] uppercase px-1.5 py-0.5 rounded bg-amber-200 text-amber-950 font-bold">Active tier</span>' : ''),
+        display: `${fmtN(o.r.units, 1)} kWh · ${fmtLkr(o.r.cost)}`,
+        segs: [{ value: o.r.cost, color: o.r.isCurrentTop ? '#f59e0b' : '#10b981' }]
+      }));
+      blockRows.push({ label: `Fixed charge (Block ${tier + 1})`, display: fmtLkr(bill.fixedCharge), segs: [{ value: bill.fixedCharge, color: '#8b5cf6' }] });
+
+      // Roommate shares (same formula as the Units page)
+      const rmCount = roommates.length;
+      let rmHtml;
+      if (rmCount === 0) {
+        rmHtml = '<p class="text-xs text-slate-500">No roommates added yet. Add some on the Units page.</p>';
+      } else {
+        const base = c.sharedBaseBill / rmCount;
+        const rmRows = roommates.map(rm => {
+          const kwh = (rm.unitCount * (resolveUnitWattage(rm.unitName) / 1000)) * rm.monthlyHours * c.personalScale;
+          const personal = kwh * c.effectiveRate;
+          return {
+            label: escapeHtml(rm.name),
+            display: `${fmtLkr(base + personal)} <span class="text-slate-500">(${fmtLkr(base)} base + ${fmtLkr(personal)} personal)</span>`,
+            segs: [{ value: base, color: '#10b981' }, { value: personal, color: '#f59e0b' }]
+          };
+        });
+        rmHtml = repBars(rmRows) + repLegend([['#10b981', 'Equal share of base bill'], ['#f59e0b', 'Personal appliance usage']]);
+      }
+
+      monthly.innerHTML = `
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+          ${repKpi('Projected Units', fmtN(c.projected30DayKwh, 1), 'kWh', `Logged ${fmtN(c.loggedKwh, 1)} kWh (day ${elapsed}/30) + forecast`)}
+          ${repKpi('Projected CEB Bill', fmtLkr(bill.grandTotal), '', `Energy ${fmtLkr(bill.energySubtotal)} + fixed ${fmtLkr(bill.fixedCharge)}`, { color: 'text-emerald-700' })}
+          ${repKpi('Avg Unit Cost', fmtN(c.avgUnitRate, 2), 'LKR/kWh', `Top rate: LKR ${fmtN(marginal, 2)}/kWh (Block ${tier + 1})`)}
+          ${repKpi('Distance to 90 kWh', c.projected30DayKwh > slabLimit ? '+' + fmtN(c.projected30DayKwh - slabLimit, 1) : fmtN(slabLimit - c.projected30DayKwh, 1), 'kWh',
+            c.projected30DayKwh > slabLimit ? 'Over the spike point — high-tariff penalty active' : 'Buffer left before the high-tariff spike',
+            { color: c.projected30DayKwh > slabLimit ? 'text-rose-700' : 'text-amber-700' })}
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-5 sm:gap-6">
+          ${repSection('Bill Breakdown by CEB Block', 'Cost of each tariff block you reach, plus the monthly fixed charge.', repBars(blockRows), 'lg:col-span-2')}
+          ${repSection('Energy vs Fixed Charge', 'How the projected bill is made up.',
+            `<div class="flex flex-col items-center gap-4">
+              ${donut([{ value: bill.energySubtotal, color: '#10b981' }, { value: bill.fixedCharge, color: '#8b5cf6' }], 'Total', fmtLkr(bill.grandTotal))}
+              <div class="w-full space-y-1.5 text-xs">
+                <div class="flex items-center justify-between gap-2"><span class="inline-flex items-center gap-1.5 text-slate-700"><span class="w-3 h-3 rounded-sm" style="background:#10b981"></span>Energy charge</span><span class="font-mono-code text-slate-900">${fmtLkr(bill.energySubtotal)} · ${fmtN(energyShare, 0)}%</span></div>
+                <div class="flex items-center justify-between gap-2"><span class="inline-flex items-center gap-1.5 text-slate-700"><span class="w-3 h-3 rounded-sm" style="background:#8b5cf6"></span>Fixed charge</span><span class="font-mono-code text-slate-900">${fmtLkr(bill.fixedCharge)} · ${fmtN(100 - energyShare, 0)}%</span></div>
+              </div>
+            </div>`)}
+        </div>
+
+        ${repSection('Cumulative Units vs Tariff Thresholds', 'Dashed horizontal lines are the CEB block boundaries — crossing 90 kWh triggers the spike.',
+          cumulativeChart(elapsed, c.loggedKwh, c.projected30DayKwh, tariffBlocks) +
+          repLegend([['#3b82f6', `Logged (days 1–${elapsed})`], ['#10b981', 'Forecast to day 30', true], ['#f59e0b', 'Block boundaries', true], ['#f43f5e', '90 kWh spike point', true]]))}
+
+        ${repSection('Monthly Bill Share per Roommate', 'Equal split of the shared base bill plus each person\u2019s own appliance usage (from the Units page).', rmHtml)}
+      `;
+    }
+
+    let serialPort = null;
+
+    async function connectWebSerial() {
+      if (!('serial' in navigator)) {
+        showToast('Web Serial is supported on Desktop Chrome/Edge. On mobile, use Simulated or Manual Meter mode.');
+        return;
+      }
+      if (serialPort) { // already open: just switch back to the live stream
+        setDataMode('serial');
+        return;
+      }
+
+      let port;
+      try {
+        port = await navigator.serial.requestPort();
+        await port.open({ baudRate: 115200 });
+      } catch (err) {
+        showToast('ESP32 Serial connection cancelled or unavailable. Staying in current mode.');
+        return;
+      }
+
+      serialPort = port;
+      serialWatts = null;
+      setDataMode('serial');
+      showToast('Connected to ESP32 via USB Serial! Expecting numeric Wattage lines (e.g., 245.5).');
+
+      try {
+        const decoder = new TextDecoderStream();
+        port.readable.pipeTo(decoder.writable).catch(() => {});
+        const reader = decoder.readable.getReader();
+        let buffer = '';
+
+        while (true) {
+          const { value, done } = await reader.read();
+          if (done) break;
+          buffer += value;
+          const lines = buffer.split('\n');
+          buffer = lines.pop();
+          for (const line of lines) {
+            const parsedW = parseFloat(line.trim());
+            if (!isNaN(parsedW) && parsedW >= 0) {
+              serialWatts = parsedW;
+              if (currentMode === 'serial') recalculateAll();
+            }
+          }
+        }
+      } catch (err) {
+        // read error / device unplugged: fall through to cleanup
+      } finally {
+        try { await port.close(); } catch (e) {}
+        serialPort = null;
+        serialWatts = null;
+        if (currentMode === 'serial') {
+          setDataMode('sim');
+          showToast('ESP32 disconnected. Back to Simulated mode.');
+        }
+      }
+    }
+
+    // Boot Application
+    window.addEventListener('DOMContentLoaded', () => {
+      syncThemeButton();
+      updateClock();
+      setInterval(updateClock, 1000);
+      renderAppliances();
+      recalculateAll();
+    });
+  </script>
+</body>
+</html>
