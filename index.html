@@ -105,6 +105,9 @@
         <span class="text-slate-300 font-mono-code text-[10px] sm:text-[11px] hidden sm:inline">
           HARDWARE TARGET: ESP32 + ACS712 (30A) Non-Invasive Clamp
         </span>
+        <button id="esp-top-chip" type="button" onclick="espChipClick()" class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full font-semibold border border-slate-700 bg-slate-800 text-slate-300 text-[10px] sm:text-xs">
+          <span id="esp-top-dot" class="w-2 h-2 rounded-full bg-slate-500"></span><span id="esp-top-text">ESP32: Disconnected</span>
+        </button>
       </div>
       <div class="flex flex-wrap items-center justify-between sm:justify-end gap-2 sm:gap-3 font-mono-code text-[10px] sm:text-[11px]">
         <span class="text-emerald-400">230V AC / 50Hz (CEB)</span>
@@ -141,16 +144,12 @@
 
       <!-- Data Input Mode Switcher -->
       <div class="flex flex-wrap items-center gap-2">
-        <div class="grid grid-cols-3 sm:inline-flex w-full sm:w-auto rounded-xl bg-slate-800 p-1 border border-slate-700" role="group">
+        <div class="grid grid-cols-2 sm:inline-flex w-full sm:w-auto rounded-xl bg-slate-800 p-1 border border-slate-700" role="group">
           <button id="btn-mode-sim" onclick="setDataMode('sim')" class="px-2.5 sm:px-3 py-1.5 rounded-lg text-[11px] sm:text-xs font-semibold transition bg-emerald-500 text-slate-950 shadow text-center">
             Simulated
           </button>
           <button id="btn-mode-manual" onclick="setDataMode('manual')" class="px-2.5 sm:px-3 py-1.5 rounded-lg text-[11px] sm:text-xs font-semibold transition text-slate-300 hover:text-white text-center">
             Manual Meter
-          </button>
-          <button id="btn-mode-serial" onclick="connectWebSerial()" class="px-2.5 sm:px-3 py-1.5 rounded-lg text-[11px] sm:text-xs font-semibold transition text-slate-300 hover:text-white flex items-center justify-center gap-1" title="Connect real ESP32 via USB Serial (Chrome/Edge)">
-            <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-            USB ESP32
           </button>
         </div>
       </div>
@@ -359,6 +358,8 @@
 
       </section>
 
+      <section class="esp-compact bg-white rounded-2xl p-4 shadow-sm border border-slate-200"></section>
+
       <!-- PHANTOM LEAKAGE ALERT BANNER -->
       <div id="leakage-alert-banner" class="hidden rounded-2xl bg-rose-50 border-2 border-rose-300 p-4 shadow-sm">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -540,6 +541,8 @@
         </div>
       </div>
 
+      <section class="esp-compact bg-white rounded-2xl p-4 shadow-sm border border-slate-200"></section>
+
       <!-- INTERACTIVE APPLIANCE MANAGER & LIVE HARDWARE FEED -->
       <section class="bg-white rounded-2xl p-4 sm:p-5 shadow-sm border border-slate-200 flex flex-col justify-between">
         <div>
@@ -691,6 +694,9 @@
     <!-- =================================================================== -->
     <div id="page-roommate" class="hidden space-y-5 sm:space-y-6">
 
+      <section class="esp-compact bg-white rounded-2xl p-4 shadow-sm border border-slate-200"></section>
+
+      
       <section class="bg-white rounded-2xl p-4 sm:p-5 shadow-sm border border-slate-200 space-y-5">
         <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3 pb-4 border-b border-slate-100">
           <div>
@@ -718,22 +724,32 @@
             <input id="new-roommate-name" type="text" required placeholder="e.g., Kavindu (Room C)"
               class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs font-semibold bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500" />
           </div>
-          <div class="sm:col-span-4">
+          <div class="sm:col-span-3">
             <label for="new-roommate-unit" class="block text-xs font-bold text-slate-800 mb-1">
               Unit Name (Personal Appliance)
             </label>
-            <input id="new-roommate-unit" list="roommate-unit-options" type="text" required placeholder="Select or type unit name..."
+            <input id="new-roommate-unit" list="roommate-unit-options" type="text" required oninput="prefillUnitFields()" placeholder="Select or type unit name..."
               class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs font-semibold bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500" />
             <datalist id="roommate-unit-options">
               <!-- Synced dynamically with Room Appliances -->
             </datalist>
           </div>
-          <div class="grid grid-cols-2 gap-2 sm:col-span-3">
+          <div class="grid grid-cols-4 gap-2 sm:col-span-4">
             <div>
               <label for="new-roommate-count" class="block text-xs font-bold text-slate-800 mb-1">
                 Count of Units
               </label>
               <input id="new-roommate-count" type="number" min="1" max="20" step="1" value="1" required
+                class="w-full rounded-xl border border-slate-300 px-2.5 py-2 text-xs font-mono-code bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+            </div>
+            <div>
+              <label for="new-roommate-watts" class="block text-xs font-bold text-slate-800 mb-1">Watts</label>
+              <input id="new-roommate-watts" type="number" min="1" max="10000" step="1" placeholder="auto"
+                class="w-full rounded-xl border border-slate-300 px-2.5 py-2 text-xs font-mono-code bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+            </div>
+            <div>
+              <label for="new-roommate-daily" class="block text-xs font-bold text-slate-800 mb-1">Hrs/Day</label>
+              <input id="new-roommate-daily" type="number" min="0.1" max="24" step="0.1" value="4"
                 class="w-full rounded-xl border border-slate-300 px-2.5 py-2 text-xs font-mono-code bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500" />
             </div>
             <div>
@@ -796,6 +812,8 @@
 
       <div id="report-daily" class="space-y-5 sm:space-y-6"></div>
       <div id="report-monthly" class="hidden space-y-5 sm:space-y-6"></div>
+
+      <section class="esp-compact bg-white rounded-2xl p-4 shadow-sm border border-slate-200"></section>
 
     </div>
 
@@ -865,7 +883,6 @@
     let currentMode = 'sim'; // 'sim' | 'manual' | 'serial'
     let currentPage = 'home'; // 'home' | 'simulator' | 'roommate' (Units) | 'reports'
     let lastCalc = null; // snapshot of the latest calculation, used by the Reports page
-    let serialWatts = null;
     let manualFixedOverride = null;
 
     // =========================================================================
@@ -1072,15 +1089,14 @@
 
       if (!name || watts <= 0) return;
 
-      appliances.push({
-        id: 'custom_' + Date.now(),
-        name,
-        units,
-        watts,
-        dailyHours,
-        active: true,
-        note: `USER ADDED: ${units} unit(s) × ${watts}W`
-      });
+      const dup = findApp(name);
+      if (dup) { // no duplicates: merge into the existing appliance
+        dup.units += units; dup.watts = watts; dup.dailyHours = dailyHours; dup.active = true; dup.linked = false;
+        showToast(`"${dup.name}" already exists: merged (now ${dup.units} units).`);
+      } else {
+        appliances.push({ id: 'custom_' + Date.now(), name, units, watts, dailyHours, active: true,
+          note: `USER ADDED: ${units} unit(s) × ${watts}W` });
+      }
 
       nameInput.value = '';
       unitsInput.value = '1';
@@ -1103,6 +1119,7 @@
       const nextVal = appliances[index].units + delta;
       if (nextVal < 1) return;
       appliances[index].units = nextVal;
+      appliances[index].linked = false; // manual override: Units page no longer auto-manages the count
       renderAppliances();
       recalculateAll();
     }
@@ -1187,7 +1204,7 @@
         const personalCost = personalKwh * effectiveUnitRate;
         const totalShare = equalSharedCost + personalCost;
         sumCheck += totalShare;
-        return { unitWatts, personalKwh, personalCost, totalShare };
+        return { unitWatts, personalKwh, personalCost, totalShare, app: findApp(rm.unitName) };
       });
 
       // Fast path: update numbers only so inputs never lose focus while typing/tabbing
@@ -1196,6 +1213,10 @@
           const card = container.children[idx];
           const c = calc[idx];
           card.querySelector('.rm-watts').textContent = `${c.unitWatts}W / unit`;
+          card.querySelector('.rm-sync').textContent = syncTxt(c.app);
+          const iw = card.querySelector('.rm-in-watts'), ih = card.querySelector('.rm-in-hrs');
+          if (document.activeElement !== iw) iw.value = c.app ? c.app.watts : c.unitWatts;
+          if (document.activeElement !== ih) ih.value = c.app ? c.app.dailyHours : '';
           card.querySelector('.rm-del').title = `Delete ${rm.name}`;
           card.querySelector('.rm-base').textContent = `LKR ${equalSharedCost.toFixed(0)}`;
           card.querySelector('.rm-personal-label').textContent = `Personal (${c.personalKwh.toFixed(1)} kWh):`;
@@ -1235,6 +1256,7 @@
                 <input list="roommate-unit-options" type="text" value="${escapeHtml(rm.unitName)}"
                   onchange="updateRoommate(${idx}, 'unitName', this.value, this)"
                   class="w-full rounded-lg border border-slate-300 px-2.5 py-1.5 text-xs font-semibold text-slate-800 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+                <div class="rm-sync text-[10px] font-mono-code text-slate-500 mt-0.5">${syncTxt(c.app)}</div>
               </div>
 
               <div class="grid grid-cols-2 gap-2 text-xs">
@@ -1249,6 +1271,18 @@
                   <input type="number" min="0" max="720" step="0.5" value="${rm.monthlyHours}"
                     onchange="updateRoommate(${idx}, 'monthlyHours', this.value, this)"
                     class="w-full rounded-lg border border-slate-300 px-2.5 py-1.5 font-mono-code text-xs bg-white" />
+                </div>
+                <div>
+                  <label class="block text-[10px] font-semibold text-slate-600 mb-0.5">Wattage (W)</label>
+                  <input type="number" min="1" max="10000" step="1" value="${c.app ? c.app.watts : c.unitWatts}"
+                    onchange="updateRoommate(${idx}, 'watts', this.value, this)"
+                    class="rm-in-watts w-full rounded-lg border border-slate-300 px-2.5 py-1.5 font-mono-code text-xs bg-white" />
+                </div>
+                <div>
+                  <label class="block text-[10px] font-semibold text-slate-600 mb-0.5">Sim Hrs / Day</label>
+                  <input type="number" min="0.1" max="24" step="0.1" value="${c.app ? c.app.dailyHours : ''}"
+                    onchange="updateRoommate(${idx}, 'dailyHours', this.value, this)"
+                    class="rm-in-hrs w-full rounded-lg border border-slate-300 px-2.5 py-1.5 font-mono-code text-xs bg-white" />
                 </div>
               </div>
             </div>
@@ -1275,12 +1309,41 @@
       document.getElementById('roommate-sum-check').textContent = `LKR ${sumCheck.toFixed(2)}`;
     }
 
+    // ---- Units <-> Live Simulator synchronisation (single source of truth: `appliances`) ----
+    // Appliances created from the Units page carry linked:true. Their unit count = sum of roommate counts and
+    // they are removed when no roommate uses them. Existing/simulator appliances are only ever raised to cover usage.
+    const normKey = n => String(n || '').trim().toLowerCase();
+    const findApp = n => appliances.find(a => normKey(a.name) === normKey(n));
+    function syncAppliancesFromUnits(touch) {
+      const sums = {};
+      roommates.forEach(r => { const k = normKey(r.unitName); sums[k] = (sums[k] || 0) + r.unitCount; });
+      (touch || []).forEach(name => {
+        const sum = sums[normKey(name)];
+        if (!sum) return;
+        const app = findApp(name);
+        if (!app) {
+          appliances.push({ id: 'unit_' + Date.now() + '_' + Math.floor(Math.random() * 1e4), name: String(name).trim(), units: sum,
+            watts: resolveUnitWattage(name), dailyHours: 4, active: true, linked: true, note: 'FROM UNITS PAGE' });
+        } else if (app.linked) app.units = sum;
+        else app.units = Math.max(app.units, sum);
+      });
+      for (let i = appliances.length - 1; i >= 0; i--) if (appliances[i].linked && !sums[normKey(appliances[i].name)]) appliances.splice(i, 1);
+    }
+    function syncTxt(app) { return app ? `Live Simulator: ${app.units} × ${app.watts}W · ${app.active ? 'ON' : 'OFF'}` : 'Not in Live Simulator (edit this row to add)'; }
+    function prefillUnitFields() {
+      const a = findApp(document.getElementById('new-roommate-unit').value);
+      if (a) { document.getElementById('new-roommate-watts').value = a.watts; document.getElementById('new-roommate-daily').value = a.dailyHours; }
+    }
+    function afterUnitsChange() { roommatesNeedRebuild = true; renderAppliances(); recalculateAll(); }
+
     function addRoommate(event) {
       event.preventDefault();
       const nameInput = document.getElementById('new-roommate-name');
       const unitInput = document.getElementById('new-roommate-unit');
       const countInput = document.getElementById('new-roommate-count');
       const hoursInput = document.getElementById('new-roommate-hours');
+      const wattsInput = document.getElementById('new-roommate-watts');
+      const dailyInput = document.getElementById('new-roommate-daily');
 
       const name = nameInput.value.trim();
       const unitName = unitInput.value.trim();
@@ -1288,17 +1351,17 @@
 
       const unitCount = Math.max(1, parseInt(countInput.value, 10) || 1);
       const monthlyHours = Math.max(0, parseFloat(hoursInput.value) || 0);
+      const watts = parseFloat(wattsInput.value), daily = parseFloat(dailyInput.value);
 
       roommates.push({ name, unitName, unitCount, monthlyHours });
-      roommatesNeedRebuild = true;
+      syncAppliancesFromUnits([unitName]);
+      const app = findApp(unitName);
+      if (app && watts > 0) app.watts = watts;
+      if (app && daily > 0) app.dailyHours = Math.min(24, daily);
 
-      nameInput.value = '';
-      unitInput.value = '';
-      countInput.value = '1';
-      hoursInput.value = '5';
-
-      recalculateAll();
-      showToast(`Added roommate "${name}" (${unitCount} × ${unitName}).`);
+      nameInput.value = ''; unitInput.value = ''; countInput.value = '1'; hoursInput.value = '5'; wattsInput.value = ''; dailyInput.value = '4';
+      afterUnitsChange();
+      showToast(`Added roommate "${name}" (${unitCount} × ${unitName}) and synced to Live Simulator.`);
     }
 
     function deleteRoommate(index) {
@@ -1307,23 +1370,32 @@
         return;
       }
       const removed = roommates.splice(index, 1)[0];
-      roommatesNeedRebuild = true;
-      recalculateAll();
+      syncAppliancesFromUnits([removed.unitName]);
+      afterUnitsChange();
       showToast(`Removed roommate "${removed.name}".`);
     }
 
     function updateRoommate(idx, field, val, el) {
+      const rm = roommates[idx], oldName = rm.unitName;
+      let shown = null;
       if (field === 'name' || field === 'unitName') {
         const trimmed = String(val).trim();
-        if (trimmed) roommates[idx][field] = trimmed;
+        if (trimmed) rm[field] = trimmed;
       } else if (field === 'unitCount') {
         const parsed = parseInt(val, 10);
-        roommates[idx].unitCount = isNaN(parsed) || parsed < 1 ? 1 : parsed;
+        rm.unitCount = isNaN(parsed) || parsed < 1 ? 1 : parsed;
       } else if (field === 'monthlyHours') {
         const parsed = parseFloat(val);
-        roommates[idx].monthlyHours = isNaN(parsed) || parsed < 0 ? 0 : parsed;
+        rm.monthlyHours = isNaN(parsed) || parsed < 0 ? 0 : parsed;
+      } else if (field === 'watts' || field === 'dailyHours') {
+        syncAppliancesFromUnits([rm.unitName]);
+        const app = findApp(rm.unitName), n = parseFloat(val);
+        if (app && n > 0) { if (field === 'watts') app.watts = n; else app.dailyHours = Math.min(24, n); }
+        shown = app ? app[field] : '';
       }
-      if (el) el.value = roommates[idx][field]; // show the sanitized value
+      if (field === 'unitName' || field === 'unitCount') syncAppliancesFromUnits([oldName, rm.unitName]);
+      if (el) el.value = shown !== null ? shown : rm[field]; // show the sanitized value
+      renderAppliances();
       recalculateAll();
     }
 
@@ -1409,9 +1481,7 @@
           }
         });
 
-        liveWatts = (currentMode === 'serial' && serialWatts !== null)
-          ? serialWatts
-          : (activeApplianceWatts + standbyWatts);
+        liveWatts = activeApplianceWatts + standbyWatts; // simulated estimate only (never ESP32)
 
         loggedKwh = parseFloat(document.getElementById('logged-kwh-slider').value) || 58;
         const standbyDailyKwh = (standbyWatts / 1000) * 24;
@@ -1419,9 +1489,7 @@
         dailyForecastKwh = activeDailyKwh + standbyDailyKwh;
         projected30DayKwh = loggedKwh + ((activeDailyKwh + standbyDailyKwh) * 10);
 
-        document.getElementById('kpi-power-source').textContent = currentMode === 'serial'
-          ? 'Source: ESP32 USB Serial'
-          : 'Sample: Appliance Sum';
+        document.getElementById('kpi-power-source').textContent = 'Sample: Appliance Sum';
         document.getElementById('kpi-kwh-source').textContent = 'Sample Meter + 10d Forecast';
         document.getElementById('kpi-logged-kwh').textContent = `${loggedKwh.toFixed(1)} kWh (Day 20/30)`;
       }
@@ -1482,6 +1550,7 @@
         daysElapsed: daysElapsedVal, dailyForecastKwh, effectiveRate, sharedBaseBill, personalScale
       };
       renderReports();
+      espRender();
     }
 
     function updateSlabGuardCard(kwh, blockIdx) {
@@ -1597,36 +1666,27 @@
     }
 
     function setDataMode(mode) {
+      if (mode !== 'manual') mode = 'sim'; // ESP32 is a telemetry feed, not a mode
       currentMode = mode;
       const btnSim = document.getElementById('btn-mode-sim');
       const btnManual = document.getElementById('btn-mode-manual');
-      const btnSerial = document.getElementById('btn-mode-serial');
       const manualPanel = document.getElementById('manual-meter-panel');
       const modeBadge = document.getElementById('mode-badge');
-
       const inactiveBtnClass = 'px-2.5 sm:px-3 py-1.5 rounded-lg text-[11px] sm:text-xs font-semibold transition text-slate-300 hover:text-white text-center';
       const activeBtnClass = 'px-2.5 sm:px-3 py-1.5 rounded-lg text-[11px] sm:text-xs font-semibold transition bg-emerald-500 text-slate-950 shadow text-center';
-
       btnSim.className = inactiveBtnClass;
       btnManual.className = inactiveBtnClass;
-      btnSerial.className = 'px-2.5 sm:px-3 py-1.5 rounded-lg text-[11px] sm:text-xs font-semibold transition text-slate-300 hover:text-white flex items-center justify-center gap-1';
-
       if (mode === 'sim') {
         btnSim.className = activeBtnClass;
         manualPanel.classList.add('hidden');
         modeBadge.className = 'inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full font-semibold bg-amber-500/20 text-amber-300 border border-amber-500/40 text-[10px] sm:text-xs';
         modeBadge.innerHTML = '<span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span> SAMPLE / SIMULATED SENSOR STREAM';
-      } else if (mode === 'manual') {
+      } else {
         btnManual.className = activeBtnClass;
         manualPanel.classList.remove('hidden');
         modeBadge.className = 'inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-[10px] sm:text-xs';
         modeBadge.innerHTML = '<span class="w-2 h-2 rounded-full bg-emerald-400"></span> VERIFIED MANUAL METER ENTRY';
         switchPage('home');
-      } else if (mode === 'serial') {
-        btnSerial.className = 'px-2.5 sm:px-3 py-1.5 rounded-lg text-[11px] sm:text-xs font-semibold transition bg-emerald-500 text-slate-950 shadow flex items-center justify-center gap-1';
-        manualPanel.classList.add('hidden');
-        modeBadge.className = 'inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-[10px] sm:text-xs';
-        modeBadge.innerHTML = '<span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span> LIVE ESP32 HARDWARE STREAM';
       }
       recalculateAll();
     }
@@ -1939,63 +1999,179 @@
       `;
     }
 
-    let serialPort = null;
+    // =========================================================================
+    // 10. ESP32 HARDWARE TELEMETRY (Web Serial) — independent of Simulated / Manual mode.
+    //     Measured values live ONLY in `esp`; they never feed the estimated or manual calculations.
+    //     Accepted serial lines (one per line, 115200 baud):
+    //       245.5                                  (legacy: watts only)
+    //       {"v":230.4,"i":1.07,"p":245.5,"kwh":0.12,"pf":0.98,"hz":50.0}
+    //       V=230.4,I=1.07,P=245.5,E=0.12
+    // =========================================================================
+    const ESP_BAUD = 115200, ESP_STALE_MS = 5000;
+    const ESP_LIMITS = { power: [0, 10000], voltage: [0, 300], current: [0, 40], energy: [0, 1e6], pf: [0, 1], freq: [40, 70] };
+    const ESP_ALIASES = {
+      power: ['p', 'w', 'watt', 'watts', 'power', 'power_w'], voltage: ['v', 'volt', 'volts', 'voltage', 'voltage_v'],
+      current: ['i', 'a', 'amp', 'amps', 'current', 'current_a'], energy: ['kwh', 'e', 'energy', 'energy_kwh'],
+      pf: ['pf', 'power_factor'], freq: ['hz', 'f', 'freq', 'freq_hz', 'frequency']
+    };
+    const esp = { status: 'disconnected', port: null, reader: null, keep: false, buf: '', last: null, lastAt: 0, openedAt: 0,
+      count: 0, rejected: 0, ignored: 0, peak: 0, sum: 0, kwh: 0, devBase: null, devKwh: null, error: null, staleToast: false };
 
-    async function connectWebSerial() {
-      if (!('serial' in navigator)) {
-        showToast('Web Serial is supported on Desktop Chrome/Edge. On mobile, use Simulated or Manual Meter mode.');
-        return;
+    // Validate one serial line -> { sample } | { error } | { ignore } (boot logs / blank lines)
+    function parseEspLine(raw) {
+      const line = String(raw).trim();
+      if (!line) return { ignore: true };
+      if (line.length > 256) return { error: 'Line too long (>256 chars)' };
+      const f = {};
+      if (line[0] === '{') {
+        let o; try { o = JSON.parse(line); } catch (e) { return { error: 'Malformed JSON' }; }
+        if (!o || typeof o !== 'object' || Array.isArray(o)) return { error: 'JSON must be an object' };
+        Object.keys(o).forEach(k => { f[k.toLowerCase()] = o[k]; });
+      } else if (/^[+-]?(\d+\.?\d*|\.\d+)$/.test(line)) {
+        f.power = line;
+      } else if (/^[A-Za-z_]+\s*[=:]/.test(line)) {
+        line.split(/[,;\s]+/).forEach(p => { const m = p.match(/^([A-Za-z_]+)[=:](.+)$/); if (m) f[m[1].toLowerCase()] = m[2]; });
+        const known = [].concat(...Object.values(ESP_ALIASES));
+        if (!Object.keys(f).some(k => known.indexOf(k) >= 0)) return { ignore: true }; // boot log text, not telemetry
+      } else return { ignore: true };
+      const v = {};
+      for (const name in ESP_ALIASES) {
+        const key = ESP_ALIASES[name].find(a => f[a] !== undefined && f[a] !== null);
+        if (key === undefined) continue;
+        const rawV = f[key];
+        const n = typeof rawV === 'number' ? rawV : (typeof rawV === 'string' && rawV.trim() !== '' ? Number(rawV) : NaN);
+        if (!Number.isFinite(n)) return { error: `${name}: not a number` };
+        if (n < ESP_LIMITS[name][0] || n > ESP_LIMITS[name][1]) return { error: `${name} out of range (${n})` };
+        v[name] = n;
       }
-      if (serialPort) { // already open: just switch back to the live stream
-        setDataMode('serial');
-        return;
+      const d = {};
+      if (v.power === undefined) {
+        if (v.current === undefined) return { error: 'No power or current value' };
+        v.power = v.current * (v.voltage !== undefined ? v.voltage : GRID_VOLTAGE_V) * (v.pf !== undefined ? v.pf : 1); d.power = true;
+        if (v.power > ESP_LIMITS.power[1]) return { error: `power out of range (${Math.round(v.power)})` };
       }
+      if (v.current === undefined) { v.current = v.power / (v.voltage !== undefined ? v.voltage : GRID_VOLTAGE_V); d.current = true; }
+      const nz = x => x === undefined ? null : x;
+      return { sample: { ts: Date.now(), power: v.power, voltage: nz(v.voltage), current: v.current, energy: nz(v.energy), pf: nz(v.pf), freq: nz(v.freq), derived: d } };
+    }
 
+    function espAccept(s) {
+      if (esp.last && s.ts - esp.last.ts < 10000) esp.kwh += (esp.last.power + s.power) / 2 / 1000 * (s.ts - esp.last.ts) / 3600000;
+      if (s.energy !== null) { if (esp.devBase === null || s.energy < esp.devBase) esp.devBase = s.energy; esp.devKwh = s.energy - esp.devBase; }
+      esp.last = s; esp.lastAt = s.ts; esp.count++; esp.sum += s.power; esp.peak = Math.max(esp.peak, s.power); esp.staleToast = false;
+    }
+
+    function espHandleChunk(text) {
+      esp.buf += text;
+      if (esp.buf.length > 4096 && esp.buf.indexOf('\n') < 0) { esp.buf = ''; esp.rejected++; esp.error = 'Buffer overflow: no line breaks (wrong baud rate?)'; }
+      const lines = esp.buf.split(/\r?\n/); esp.buf = lines.pop();
+      lines.forEach(l => {
+        const r = parseEspLine(l);
+        if (r.sample) espAccept(r.sample);
+        else if (r.ignore) esp.ignored++;
+        else { esp.rejected++; esp.error = r.error; }
+      });
+      if (lines.length) espRender();
+    }
+
+    function espStatus() {
+      if (!esp.port) return 'disconnected';
+      return esp.last && esp.lastAt >= esp.openedAt && Date.now() - esp.lastAt < ESP_STALE_MS ? 'connected' : 'waiting';
+    }
+
+    async function espConnect() {
+      if (esp.port) return;
+      if (!('serial' in navigator)) { showToast('Web Serial needs desktop Chrome/Edge. Simulated and Manual modes still work.'); return; }
       let port;
+      try { port = await navigator.serial.requestPort(); } catch (e) { return; } // user cancelled the picker
+      try { await port.open({ baudRate: ESP_BAUD }); }
+      catch (e) { esp.error = 'Could not open port: ' + (e.message || e) + ' (close Serial Monitor / other tabs)'; showToast('ESP32 port could not be opened.'); espRender(); return; }
+      Object.assign(esp, { port, keep: true, buf: '', last: null, lastAt: 0, openedAt: Date.now(), count: 0, rejected: 0, ignored: 0,
+        peak: 0, sum: 0, kwh: 0, devBase: null, devKwh: null, error: null, staleToast: false });
+      espRender();
+      showToast('ESP32 port open. Waiting for data lines...');
+      espReadLoop(port);
+    }
+
+    async function espReadLoop(port) {
+      const decoder = new TextDecoder();
       try {
-        port = await navigator.serial.requestPort();
-        await port.open({ baudRate: 115200 });
-      } catch (err) {
-        showToast('ESP32 Serial connection cancelled or unavailable. Staying in current mode.');
-        return;
-      }
-
-      serialPort = port;
-      serialWatts = null;
-      setDataMode('serial');
-      showToast('Connected to ESP32 via USB Serial! Expecting numeric Wattage lines (e.g., 245.5).');
-
-      try {
-        const decoder = new TextDecoderStream();
-        port.readable.pipeTo(decoder.writable).catch(() => {});
-        const reader = decoder.readable.getReader();
-        let buffer = '';
-
-        while (true) {
-          const { value, done } = await reader.read();
-          if (done) break;
-          buffer += value;
-          const lines = buffer.split('\n');
-          buffer = lines.pop();
-          for (const line of lines) {
-            const parsedW = parseFloat(line.trim());
-            if (!isNaN(parsedW) && parsedW >= 0) {
-              serialWatts = parsedW;
-              if (currentMode === 'serial') recalculateAll();
+        while (port.readable && esp.keep) {
+          esp.reader = port.readable.getReader();
+          try {
+            while (true) {
+              const { value, done } = await esp.reader.read();
+              if (done) break;
+              if (value) espHandleChunk(decoder.decode(value, { stream: true }));
             }
-          }
+          } catch (e) { esp.error = 'Read error: ' + (e.message || e); }
+          finally { try { esp.reader.releaseLock(); } catch (e) {} esp.reader = null; }
         }
-      } catch (err) {
-        // read error / device unplugged: fall through to cleanup
       } finally {
         try { await port.close(); } catch (e) {}
-        serialPort = null;
-        serialWatts = null;
-        if (currentMode === 'serial') {
-          setDataMode('sim');
-          showToast('ESP32 disconnected. Back to Simulated mode.');
-        }
+        espClosed(esp.keep ? 'ESP32 disconnected (device unplugged or port lost).' : 'ESP32 disconnected.');
       }
+    }
+
+    function espClosed(msg) {
+      if (!esp.port) return;
+      esp.port = null; esp.keep = false; esp.reader = null;
+      showToast(msg + ' Simulated / Manual calculations are unaffected.');
+      espRender();
+    }
+
+    async function espDisconnect() {
+      esp.keep = false;
+      try { if (esp.reader) await esp.reader.cancel(); } catch (e) {}
+    }
+    function espToggleConnection() { return esp.port ? espDisconnect() : espConnect(); }
+    function espChipClick() { if (esp.port) switchPage('simulator'); else espConnect(); }
+    function connectWebSerial() { return espConnect(); } // kept for backward compatibility
+    if ('serial' in navigator) navigator.serial.addEventListener('disconnect', e => { if (esp.port && e.target === esp.port) { esp.keep = false; setTimeout(() => espClosed('ESP32 unplugged.'), 300); } });
+
+    const ESP_PILL = { disconnected: ['Disconnected', 'bg-slate-100 text-slate-700 border-slate-200'],
+      waiting: ['Waiting for Data', 'bg-amber-100 text-amber-900 border-amber-300'], connected: ['Connected', 'bg-emerald-100 text-emerald-900 border-emerald-300'] };
+    const ESP_TILE = 'rounded-xl bg-slate-50 border border-slate-200 p-2.5';
+    function espMount() {
+      const tile = (label, k) => `<div class="${ESP_TILE}"><div class="text-[10px] font-bold uppercase text-slate-500">${label}</div><div data-esp="${k}" class="text-base font-extrabold font-mono-code text-slate-900 mt-0.5">—</div></div>`;
+      document.querySelectorAll('.esp-compact').forEach(el => {
+        el.innerHTML = `
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <div class="flex flex-wrap items-center gap-2">
+              <h3 class="text-sm font-extrabold text-slate-900">ESP32 Live Hardware Telemetry</h3>
+              <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-blue-100 text-blue-900 border border-blue-200">ACTUAL MEASUREMENT</span>
+              <span data-esp-pill></span>
+            </div>
+            <button type="button" data-esp-btn onclick="espToggleConnection()" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white transition"></button>
+          </div>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-3">${tile('Power (measured)', 'power')}${tile('Voltage', 'voltage')}${tile('Current', 'current')}${tile('Session Energy', 'energy')}</div>
+          <p class="text-[11px] text-slate-700 mt-2 font-mono-code"><span data-esp="delta"></span> · <span data-esp="age"></span></p>
+          <p class="text-[10px] text-slate-500 font-mono-code mt-0.5" data-esp="stats"></p>
+          <p class="hidden text-[10px] text-rose-700 font-semibold mt-0.5" data-esp="error"></p>
+          <p class="text-[10px] text-slate-500 mt-1">Measured by the ESP32 only. Never mixed into the simulated estimate, manual meter values or the CEB bill. * = derived from other fields.</p>`;
+      });
+      espRender();
+    }
+
+    function espRender() {
+      const st = esp.status = espStatus(), s = esp.last;
+      if (st === 'waiting' && s && !esp.staleToast && Date.now() - esp.lastAt >= ESP_STALE_MS) { esp.staleToast = true; showToast('No valid ESP32 data for 5 s. Check wiring / baud rate.'); }
+      const set = (k, t) => document.querySelectorAll(`[data-esp="${k}"]`).forEach(e => { e.textContent = t; });
+      const fx = (n, d, u) => n === null || n === undefined ? '—' : n.toFixed(d) + u;
+      document.querySelectorAll('[data-esp-pill]').forEach(e => { e.textContent = ESP_PILL[st][0]; e.className = 'text-[10px] font-bold px-2 py-0.5 rounded-md border ' + ESP_PILL[st][1]; });
+      document.querySelectorAll('[data-esp-btn]').forEach(e => { e.textContent = esp.port ? 'Disconnect ESP32' : 'Connect ESP32'; });
+      set('power', s ? Math.round(s.power) + ' W' + (s.derived.power ? ' *' : '') : '— W');
+      set('voltage', s ? fx(s.voltage, 1, ' V') : '— V');
+      set('current', s ? s.current.toFixed(2) + ' A' + (s.derived.current ? ' *' : '') : '— A');
+      set('energy', esp.count ? (esp.devKwh !== null ? esp.devKwh : esp.kwh).toFixed(3) + ' kWh' : '— kWh');
+      const est = lastCalc ? lastCalc.liveWatts : 0, label = currentMode === 'manual' ? 'manual meter entry' : 'simulated estimate';
+      set('delta', s ? `Measured ${Math.round(s.power)} W vs ${label} ${Math.round(est)} W (${s.power - est >= 0 ? '+' : ''}${Math.round(s.power - est)} W)` : `${label}: ${Math.round(est)} W (no hardware reading yet)`);
+      set('age', st === 'connected' ? 'live' : s ? `last reading ${Math.round((Date.now() - esp.lastAt) / 1000)}s ago` : 'no data yet');
+      set('stats', `Samples ${esp.count} · Rejected ${esp.rejected} · Ignored ${esp.ignored} · Peak ${Math.round(esp.peak)} W · Avg ${esp.count ? Math.round(esp.sum / esp.count) : 0} W`);
+      document.querySelectorAll('[data-esp="error"]').forEach(e => { e.textContent = esp.error ? 'Last rejected: ' + esp.error : ''; e.classList.toggle('hidden', !esp.error); });
+      const dot = { disconnected: 'bg-slate-500', waiting: 'bg-amber-400 animate-pulse', connected: 'bg-emerald-400' }[st];
+      const dotEl = document.getElementById('esp-top-dot'), txt = document.getElementById('esp-top-text');
+      if (dotEl) { dotEl.className = 'w-2 h-2 rounded-full ' + dot; txt.textContent = 'ESP32: ' + ESP_PILL[st][0]; }
     }
 
     // Boot Application
@@ -2003,8 +2179,11 @@
       syncThemeButton();
       updateClock();
       setInterval(updateClock, 1000);
+      espMount();
+      syncAppliancesFromUnits(roommates.map(r => r.unitName));
       renderAppliances();
       recalculateAll();
+      setInterval(espRender, 1000); // status watchdog: Connected <-> Waiting for Data
     });
   </script>
 </body>
